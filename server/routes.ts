@@ -1,0 +1,183 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { insertPaymentSchema } from "@shared/schema";
+import { z } from "zod";
+import path from "path";
+
+// Mock WaafiPay integration - replace with actual evc-plus when API keys are available
+const processWaafiPayment = async (paymentData: {
+  phone: string;
+  amount: number;
+  paymentMethod: string;
+  courseId: string;
+}) => {
+  const demoMode = process.env.DEMO_MODE !== 'false';
+  
+  if (demoMode) {
+    // Simulate payment processing in demo mode
+    return {
+      success: true,
+      transactionId: `TXN_${Date.now()}`,
+      message: "Payment processed successfully (Demo Mode)"
+    };
+  }
+
+  // In production, use actual WaafiPay integration
+  try {
+    const { payByWaafiPay } = require('evc-plus');
+    
+    const response = await payByWaafiPay({
+      phone: paymentData.phone,
+      amount: paymentData.amount * 100, // Convert to cents
+      merchantUid: process.env.WAAFI_MERCHANT_UID || 'M******',
+      apiUserId: process.env.WAAFI_API_USER_ID || '1******',
+      apiKey: process.env.WAAFI_API_KEY || 'API-*******',
+      description: `Course purchase: ${paymentData.courseId}`,
+      invoiceId: `INV_${Date.now()}`,
+      referenceId: `REF_${Date.now()}`,
+    });
+
+    return {
+      success: response.responseCode === "2001",
+      transactionId: response.transactionId,
+      message: response.responseMsg
+    };
+  } catch (error) {
+    console.error('WaafiPay payment error:', error);
+    return {
+      success: false,
+      message: "Payment processing failed"
+    };
+  }
+};
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Get all courses
+  app.get("/api/courses", async (req, res) => {
+    try {
+      const courses = await storage.getAllCourses();
+      res.json(courses);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch courses" });
+    }
+  });
+
+  // Get single course
+  app.get("/api/courses/:id", async (req, res) => {
+    try {
+      const course = await storage.getCourse(req.params.id);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      res.json(course);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch course" });
+    }
+  });
+
+  // Create payment
+  app.post("/api/payments", async (req, res) => {
+    try {
+      const paymentData = insertPaymentSchema.parse(req.body);
+      
+      // Validate course exists
+      const course = await storage.getCourse(paymentData.courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      // Create payment record
+      const payment = await storage.createPayment(paymentData);
+
+      // Process payment with WaafiPay
+      const paymentResult = await processWaafiPayment({
+        phone: paymentData.phone,
+        amount: parseFloat(paymentData.amount),
+        paymentMethod: paymentData.paymentMethod,
+        courseId: paymentData.courseId
+      });
+
+      // Update payment status
+      const updatedPayment = await storage.updatePaymentStatus(
+        payment.id,
+        paymentResult.success ? "completed" : "failed",
+        paymentResult.transactionId
+      );
+
+      res.json({
+        payment: updatedPayment,
+        success: paymentResult.success,
+        message: paymentResult.message
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid payment data", errors: error.errors });
+      }
+      console.error('Payment error:', error);
+      res.status(500).json({ message: "Payment processing failed" });
+    }
+  });
+
+  // Get payment status
+  app.get("/api/payments/:id", async (req, res) => {
+    try {
+      const payment = await storage.getPayment(req.params.id);
+      if (!payment) {
+        return res.status(404).json({ message: "Payment not found" });
+      }
+      res.json(payment);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch payment" });
+    }
+  });
+
+  // Check if user has access to course
+  app.get("/api/access/:courseId/:phone", async (req, res) => {
+    try {
+      const { courseId, phone } = req.params;
+      const payment = await storage.getCompletedPaymentForCourse(courseId, phone);
+      
+      res.json({
+        hasAccess: !!payment,
+        payment: payment || null
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check access" });
+    }
+  });
+
+  // Download course file (protected)
+  app.get("/api/download/:courseId/:phone", async (req, res) => {
+    try {
+      const { courseId, phone } = req.params;
+      
+      // Verify payment
+      const payment = await storage.getCompletedPaymentForCourse(courseId, phone);
+      if (!payment) {
+        return res.status(403).json({ message: "Access denied. Payment required." });
+      }
+
+      // Get course details
+      const course = await storage.getCourse(courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      // Serve file
+      const filePath = path.join(process.cwd(), 'public', course.fileUrl);
+      res.download(filePath, `${courseId}.zip`, (err) => {
+        if (err) {
+          console.error('Download error:', err);
+          res.status(500).json({ message: "Failed to download course" });
+        }
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      res.status(500).json({ message: "Failed to download course" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
