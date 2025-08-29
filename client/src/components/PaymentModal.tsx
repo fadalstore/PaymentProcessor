@@ -99,7 +99,7 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
     // Create a temporary link to trigger download
     const link = document.createElement('a');
     link.href = downloadUrl;
-    link.download = `${course.id}.zip`;
+    link.download = `${course.title[language].replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-')}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -185,9 +185,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Course not found" });
       }
 
-      // Serve file
+      // Serve file (PDF format for better mobile compatibility)
       const filePath = path.join(process.cwd(), 'public', course.fileUrl);
-      res.download(filePath, `${courseId}.zip`, (err) => {
+      const fileExtension = course.fileUrl.split('.').pop();
+      const downloadName = `${course.title.en.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-')}.${fileExtension}`;
+      
+      res.download(filePath, downloadName, (err) => {
         if (err) {
           console.error('Download error:', err);
           res.status(500).json({ message: "Failed to download course" });
