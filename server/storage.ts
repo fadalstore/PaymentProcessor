@@ -203,6 +203,7 @@ export class MemStorage implements IStorage {
     const course: Course = {
       ...insertCourse,
       id,
+      price: insertCourse.price || "0.50",
       createdAt: new Date(),
     };
     this.courses.set(id, course);
@@ -215,6 +216,7 @@ export class MemStorage implements IStorage {
       ...insertPayment,
       id,
       status: "pending",
+      transactionId: null,
       createdAt: new Date(),
     };
     this.payments.set(id, payment);
