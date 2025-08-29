@@ -30,156 +30,192 @@ export class MemStorage implements IStorage {
       {
         id: "web-development",
         title: {
-          so: "Web Development Buuxa",
-          en: "Complete Web Development",
-          ar: "تطوير الويب الكامل"
+          so: "Web Development Master Course",
+          en: "Complete Full-Stack Web Development",
+          ar: "دورة تطوير الويب الشاملة"
         },
         description: {
-          so: "HTML, CSS, JavaScript iyo React. Wax ku ool ah oo aad ku dhisi karto websiteyo casri ah.",
-          en: "HTML, CSS, JavaScript and React. Everything you need to build modern websites.",
-          ar: "HTML و CSS و JavaScript و React. كل ما تحتاجه لبناء مواقع ويب حديثة."
-        },
-        category: "Technology",
-        price: "0.50",
-        duration: "8 saac",
-        rating: "4.9",
-        image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300",
-        fileUrl: "/courses/web-development.zip",
-        curriculum: [
-          "HTML5 iyo CSS3 fundamentals",
-          "JavaScript ES6+ programming",
-          "React.js component development",
-          "Responsive design principles"
-        ],
-        createdAt: new Date()
-      },
-      {
-        id: "python-basics",
-        title: {
-          so: "Python Asaasiga",
-          en: "Python Basics",
-          ar: "أساسيات بايثون"
-        },
-        description: {
-          so: "Baro Python programming oo aad ku dhisi karto applications iyo automation tools.",
-          en: "Learn Python programming to build applications and automation tools.",
-          ar: "تعلم برمجة بايثون لبناء التطبيقات وأدوات الأتمتة."
+          so: "Koorso buuxa oo ka kooban HTML5, CSS3, JavaScript, Node.js, MongoDB iyo React. Waxaad baran doontaa sidaad u dhisato websites iyo web applications oo casri ah.",
+          en: "Comprehensive course covering HTML5, CSS3, JavaScript, Node.js, MongoDB and React. Learn to build modern websites and full-stack web applications from scratch.",
+          ar: "دورة شاملة تغطي HTML5 و CSS3 و JavaScript و Node.js و MongoDB و React. تعلم بناء مواقع الويب وتطبيقات الويب الكاملة من البداية."
         },
         category: "Programming",
         price: "0.50",
-        duration: "6 saac",
-        rating: "4.8",
+        duration: "12 saac",
+        rating: "4.9",
+        image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300",
+        fileUrl: "/courses/web-development-complete.pdf",
+        curriculum: [
+          "HTML5 & CSS3 Advanced Techniques",
+          "JavaScript ES6+ & DOM Manipulation", 
+          "React.js Components & State Management",
+          "Node.js & Express Server Development",
+          "MongoDB Database Integration",
+          "RESTful API Development",
+          "Authentication & Security",
+          "Deployment & Production Setup"
+        ],
+        createdAt: new Date()
+      },
+      {
+        id: "python-complete",
+        title: {
+          so: "Python Master Class - Asaasiga ilaa Xirfadda",
+          en: "Python Complete Course - From Beginner to Advanced",
+          ar: "دورة بايثون الشاملة - من المبتدئ إلى المتقدم"
+        },
+        description: {
+          so: "Koorso buuxa oo Python programming ah oo ka bilaaban syntax asaasiga ah ilaa advanced topics sida data science, machine learning, iyo web development Django.",
+          en: "Complete Python programming course from basic syntax to advanced topics including data science, machine learning, automation, and web development with Django.",
+          ar: "دورة برمجة بايثون الشاملة من الصيغة الأساسية إلى المواضيع المتقدمة بما في ذلك علم البيانات والتعلم الآلي والأتمتة وتطوير الويب باستخدام Django."
+        },
+        category: "Programming",
+        price: "0.50",
+        duration: "15 saac",
+        rating: "4.9",
         image: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300",
-        fileUrl: "/courses/python-basics.zip",
+        fileUrl: "/courses/python-complete-mastery.pdf",
         curriculum: [
-          "Python syntax and basics",
-          "Data structures and algorithms",
-          "Object-oriented programming",
-          "File handling and APIs"
+          "Python Fundamentals & Syntax",
+          "Data Types, Variables & Control Flow",
+          "Functions, Modules & Packages", 
+          "Object-Oriented Programming",
+          "File Handling & Exception Management",
+          "Libraries: NumPy, Pandas, Matplotlib",
+          "Data Analysis & Visualization",
+          "Web Scraping with BeautifulSoup",
+          "Django Web Framework Basics",
+          "API Development & Integration",
+          "Automation Scripts & Tools",
+          "Introduction to Machine Learning"
         ],
         createdAt: new Date()
       },
       {
-        id: "ms-office",
+        id: "microsoft-office-2024",
         title: {
-          so: "Microsoft Office",
-          en: "Microsoft Office",
-          ar: "مايكروسوفت أوفيس"
+          so: "Microsoft Office 2024 Professional",
+          en: "Microsoft Office 2024 Complete Mastery",
+          ar: "إتقان مايكروسوفت أوفيس 2024 الكامل"
         },
         description: {
-          so: "Word, Excel, PowerPoint - dhammaan waxaad u baahan tahay xafiiska casriga ah.",
-          en: "Word, Excel, PowerPoint - everything you need for modern office work.",
-          ar: "Word و Excel و PowerPoint - كل ما تحتاجه للعمل المكتبي الحديث."
+          so: "Koorso Professional ah oo ku saabsan Microsoft Office 2024: Word, Excel, PowerPoint, Outlook, OneNote. Waxaad baran doontaa advanced techniques, automation, iyo business applications.",
+          en: "Professional Microsoft Office 2024 training: Word, Excel, PowerPoint, Outlook, OneNote. Master advanced techniques, automation, macros, and business applications for maximum productivity.",
+          ar: "تدريب احترافي على مايكروسوفت أوفيس 2024: Word و Excel و PowerPoint و Outlook و OneNote. إتقان التقنيات المتقدمة والأتمتة والماكرو وتطبيقات الأعمال لتحقيق أقصى إنتاجية."
         },
-        category: "Office",
+        category: "Office Productivity",
         price: "0.50",
-        duration: "5 saac",
-        rating: "4.7",
-        image: "https://images.unsplash.com/photo-1586717799252-bd134ad00e26?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300",
-        fileUrl: "/courses/ms-office.zip",
-        curriculum: [
-          "Microsoft Word advanced features",
-          "Excel formulas and data analysis",
-          "PowerPoint presentation design",
-          "Office integration and collaboration"
-        ],
-        createdAt: new Date()
-      },
-      {
-        id: "digital-marketing",
-        title: {
-          so: "Digital Marketing",
-          en: "Digital Marketing",
-          ar: "التسويق الرقمي"
-        },
-        description: {
-          so: "Social Media, SEO, Google Ads - xirfadaha suuq-geynta casriga ah.",
-          en: "Social Media, SEO, Google Ads - modern marketing skills.",
-          ar: "وسائل التواصل الاجتماعي وSEO وإعلانات Google - مهارات التسويق الحديثة."
-        },
-        category: "Marketing",
-        price: "0.50",
-        duration: "7 saac",
+        duration: "10 saac",
         rating: "4.8",
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300",
-        fileUrl: "/courses/digital-marketing.zip",
+        image: "https://images.unsplash.com/photo-1586717799252-bd134ad00e26?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300",
+        fileUrl: "/courses/microsoft-office-2024-professional.pdf",
         curriculum: [
-          "Social media strategy",
-          "Search engine optimization",
-          "Google Ads and PPC",
-          "Analytics and measurement"
+          "Word 2024: Advanced Document Formatting & Templates",
+          "Excel 2024: Formulas, Functions & Data Analysis",
+          "PowerPoint 2024: Professional Presentation Design",
+          "Outlook 2024: Email Management & Calendar Optimization",
+          "OneNote 2024: Advanced Note Organization",
+          "Office Integration & Collaboration Tools",
+          "Macros & Automation for Productivity",
+          "Data Visualization & Charts",
+          "Mail Merge & Document Automation",
+          "SharePoint Integration & Cloud Collaboration"
+        ],
+        createdAt: new Date()
+      },
+      {
+        id: "digital-marketing-mastery",
+        title: {
+          so: "Digital Marketing Mastery 2024",
+          en: "Complete Digital Marketing Certification Course",
+          ar: "دورة شهادة التسويق الرقمي الشاملة"
+        },
+        description: {
+          so: "Koorso buuxa oo Digital Marketing ah oo la mid ah Google Certificate. Waxaad baran doontaa SEO, Google Ads, Facebook Marketing, Email Marketing, Content Strategy, iyo Analytics.",
+          en: "Complete Digital Marketing course equivalent to Google Digital Marketing Certificate. Master SEO, Google Ads, Facebook Marketing, Email Marketing, Content Strategy, Analytics and more.",
+          ar: "دورة التسويق الرقمي الشاملة المعادلة لشهادة جوجل للتسويق الرقمي. أتقن SEO وإعلانات Google والتسويق عبر Facebook والتسويق بالبريد الإلكتروني واستراتيجية المحتوى والتحليلات وأكثر."
+        },
+        category: "Digital Marketing",
+        price: "0.50",
+        duration: "20 saac",
+        rating: "4.9",
+        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300",
+        fileUrl: "/courses/digital-marketing-mastery-2024.pdf",
+        curriculum: [
+          "Digital Marketing Fundamentals & Strategy",
+          "Search Engine Optimization (SEO) Mastery",
+          "Google Ads & PPC Campaign Management", 
+          "Facebook & Instagram Marketing",
+          "Email Marketing & Automation",
+          "Content Marketing & Strategy",
+          "Social Media Management",
+          "Google Analytics & Data Analysis",
+          "Conversion Rate Optimization",
+          "Affiliate Marketing Basics",
+          "E-commerce Marketing",
+          "Marketing Automation Tools",
+          "ROI Measurement & Reporting",
+          "Brand Building & Online Reputation"
         ],
         createdAt: new Date()
       },
       {
         id: "graphic-design",
         title: {
-          so: "Graphic Design",
-          en: "Graphic Design",
-          ar: "التصميم الجرافيكي"
+          so: "Graphic Design Mastery",
+          en: "Professional Graphic Design Course", 
+          ar: "دورة التصميم الجرافيكي المحترف"
         },
         description: {
-          so: "Canva, Photoshop - samee sawiro qurux badan oo xirfad leh.",
-          en: "Canva, Photoshop - create beautiful and professional graphics.",
-          ar: "Canva و Photoshop - إنشاء رسومات جميلة واحترافية."
+          so: "Koorso buuxa oo Graphic Design ah: Canva, Photoshop, Illustrator. Waxaad baran doontaa logo design, brand identity, marketing materials, iyo digital graphics.",
+          en: "Complete Graphic Design course: Canva, Photoshop, Illustrator. Learn logo design, brand identity, marketing materials, and professional digital graphics creation.",
+          ar: "دورة التصميم الجرافيكي الشاملة: Canva و Photoshop و Illustrator. تعلم تصميم الشعارات والهوية التجارية والمواد التسويقية والرسومات الرقمية المحترفة."
         },
-        category: "Design",
+        category: "Creative Design",
         price: "0.50",
-        duration: "6 saac",
+        duration: "8 saac",
         rating: "4.9",
         image: "https://images.unsplash.com/photo-1541462608143-67571c6738dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300",
-        fileUrl: "/courses/graphic-design.zip",
+        fileUrl: "/courses/graphic-design-mastery.pdf",
         curriculum: [
-          "Design principles and theory",
-          "Canva for quick designs",
-          "Photoshop advanced techniques",
-          "Brand identity design"
+          "Design Principles and Color Theory",
+          "Canva Pro Mastery for Quick Designs",
+          "Adobe Photoshop Advanced Techniques", 
+          "Adobe Illustrator Vector Graphics",
+          "Brand Identity and Logo Design",
+          "Marketing Materials Creation",
+          "Social Media Graphics Design",
+          "Print Design and Preparation"
         ],
         createdAt: new Date()
       },
       {
         id: "video-editing",
         title: {
-          so: "Video Editing",
-          en: "Video Editing",
-          ar: "تحرير الفيديو"
+          so: "Professional Video Editing",
+          en: "Complete Video Production & Editing",
+          ar: "إنتاج وتحرير الفيديو الشامل"
         },
         description: {
-          so: "CapCut, Premiere Pro - samee fiidiyoowyin xirfad leh oo soo jiidaya.",
-          en: "CapCut, Premiere Pro - create professional and engaging videos.",
-          ar: "CapCut و Premiere Pro - إنشاء مقاطع فيديو احترافية وجذابة."
+          so: "Koorso buuxa oo Video Editing ah: CapCut, Premiere Pro, After Effects. Waxaad baran doontaa video production, color grading, motion graphics, iyo social media content creation.",
+          en: "Complete Video Editing course: CapCut, Premiere Pro, After Effects. Learn video production, color grading, motion graphics, and social media content creation from scratch.",
+          ar: "دورة تحرير الفيديو الشاملة: CapCut و Premiere Pro و After Effects. تعلم إنتاج الفيديو وتدرج الألوان ورسومات الحركة وإنشاء محتوى وسائل التواصل الاجتماعي من البداية."
         },
-        category: "Media",
+        category: "Video Production",
         price: "0.50",
-        duration: "7 saac",
+        duration: "10 saac",
         rating: "4.8",
         image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300",
-        fileUrl: "/courses/video-editing.zip",
+        fileUrl: "/courses/video-editing-professional.pdf",
         curriculum: [
-          "Video editing fundamentals",
-          "CapCut mobile editing",
-          "Adobe Premiere Pro workflow",
-          "Color grading and audio"
+          "Video Editing Fundamentals",
+          "CapCut Mobile and Desktop Mastery",
+          "Adobe Premiere Pro Professional Workflow",
+          "Color Grading and Audio Mixing",
+          "Motion Graphics and Text Animation",
+          "Social Media Video Creation",
+          "YouTube Content Production",
+          "Commercial Video Production"
         ],
         createdAt: new Date()
       }
@@ -204,6 +240,7 @@ export class MemStorage implements IStorage {
       ...insertCourse,
       id,
       price: insertCourse.price || "0.50",
+      rating: insertCourse.rating || "4.5",
       createdAt: new Date(),
     };
     this.courses.set(id, course);

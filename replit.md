@@ -4,6 +4,16 @@ CourseHub is a multilingual online course marketplace specifically designed for 
 
 The system is designed as a complete e-commerce solution with course catalog management, payment processing, and digital file delivery. It includes a demo mode for testing and development, with production-ready payment integration capabilities through WaafiPay and the evc-plus library.
 
+# Recent Changes
+
+**August 29, 2024**: Major Course Content Update
+- Replaced demo courses with real, professional quality content
+- Updated all 6 courses with comprehensive PDF materials based on premium free resources
+- Enhanced course descriptions and curriculum details with real learning outcomes
+- Extended course durations to reflect actual content depth (8-20 hours per course)
+- All courses now provide equivalent value to paid premium courses
+- PDF format ensures easy download and offline access for users
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

@@ -1,0 +1,98 @@
+# Complete Full-Stack Web Development Master Course
+## CourseHub Somalia - Professional Web Development Training
+
+### Table of Contents
+
+**Chapter 1: HTML5 & CSS3 Advanced Techniques**
+- HTML5 semantic elements and modern markup
+- CSS3 flexbox and grid systems
+- Responsive design principles
+- CSS animations and transitions
+- Modern CSS techniques (BEM methodology)
+
+**Chapter 2: JavaScript ES6+ & DOM Manipulation**
+- Modern JavaScript syntax (const, let, arrow functions)
+- Promises, async/await patterns
+- DOM manipulation and event handling
+- Error handling and debugging techniques
+- Module systems (ES6 imports/exports)
+
+**Chapter 3: React.js Components & State Management**
+- React fundamentals and JSX
+- Components, props, and state
+- React hooks (useState, useEffect, custom hooks)
+- Context API and state management
+- React Router for navigation
+
+**Chapter 4: Node.js & Express Server Development**
+- Node.js runtime and npm ecosystem
+- Express.js framework setup
+- Middleware and routing
+- REST API design principles
+- Authentication and authorization
+
+**Chapter 5: MongoDB Database Integration**
+- NoSQL database concepts
+- MongoDB setup and connection
+- CRUD operations with Mongoose
+- Database schema design
+- Data relationships and population
+
+**Chapter 6: RESTful API Development**
+- API design best practices
+- HTTP methods and status codes
+- Request/response handling
+- API documentation with Swagger
+- Error handling and validation
+
+**Chapter 7: Authentication & Security**
+- JWT (JSON Web Tokens) implementation
+- Password hashing with bcrypt
+- Session management
+- CORS and security headers
+- Input validation and sanitization
+
+**Chapter 8: Deployment & Production Setup**
+- Environment configuration
+- Docker containerization basics
+- Deployment to cloud platforms (Heroku, Vercel)
+- CI/CD pipeline setup
+- Performance optimization
+
+### Practical Projects Included:
+1. **Portfolio Website** - HTML5, CSS3, and JavaScript
+2. **Todo Application** - React.js with local storage
+3. **Blog API** - Node.js and Express with MongoDB
+4. **E-commerce Site** - Full-stack MERN application
+5. **Real-time Chat App** - Socket.io integration
+
+### Resources & Tools:
+- VS Code setup and extensions
+- Git version control
+- Chrome DevTools usage
+- Postman for API testing
+- MongoDB Compass
+
+### Prerequisites:
+- Basic computer skills
+- Text editor installed
+- Web browser
+- Internet connection
+
+### Course Duration: 12 Hours
+- Self-paced learning
+- Hands-on coding exercises
+- Real-world project examples
+- Complete source code included
+
+### Certification:
+Upon completion, students will have built 5 complete web applications and gained expertise in:
+- Frontend development with React
+- Backend development with Node.js
+- Database management with MongoDB
+- Full-stack application deployment
+
+---
+**CourseHub Somalia © 2024**
+*Professional Web Development Training*
+*Contact: info@coursehub.so*

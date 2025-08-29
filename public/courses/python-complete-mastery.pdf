@@ -1,0 +1,136 @@
+# Python Complete Course - From Beginner to Advanced
+## CourseHub Somalia - Master Python Programming
+
+### Course Overview
+This comprehensive Python course takes you from complete beginner to advanced Python developer. Learn Python programming, data science, web development, and automation.
+
+### Table of Contents
+
+**Chapter 1: Python Fundamentals & Syntax**
+- Installing Python and setting up development environment
+- Python interactive shell and IDLE
+- Variables, comments, and basic I/O
+- Python naming conventions and best practices
+
+**Chapter 2: Data Types, Variables & Control Flow**
+- Numbers, strings, and boolean operations
+- Lists, tuples, dictionaries, and sets
+- Conditional statements (if, elif, else)
+- Loops (for, while) and loop control statements
+
+**Chapter 3: Functions, Modules & Packages**
+- Defining and calling functions
+- Function parameters and return values
+- Lambda functions and higher-order functions
+- Creating and importing modules
+- Python standard library overview
+
+**Chapter 4: Object-Oriented Programming**
+- Classes and objects fundamentals
+- Instance and class variables
+- Methods and constructors
+- Inheritance and polymorphism
+- Encapsulation and abstraction
+
+**Chapter 5: File Handling & Exception Management**
+- Reading and writing files
+- Working with CSV and JSON data
+- Exception handling (try, except, finally)
+- Custom exception classes
+- Context managers and 'with' statement
+
+**Chapter 6: Libraries: NumPy, Pandas, Matplotlib**
+- NumPy arrays and mathematical operations
+- Pandas DataFrames for data manipulation
+- Data cleaning and preprocessing
+- Data visualization with Matplotlib
+- Statistical analysis basics
+
+**Chapter 7: Data Analysis & Visualization**
+- Exploratory data analysis techniques
+- Creating charts and graphs
+- Working with real datasets
+- Data aggregation and grouping
+- Statistical visualizations
+
+**Chapter 8: Web Scraping with BeautifulSoup**
+- HTML parsing fundamentals
+- Requests library for HTTP operations
+- BeautifulSoup for web scraping
+- Handling dynamic content
+- Best practices and ethics
+
+**Chapter 9: Django Web Framework Basics**
+- Django project setup and structure
+- Models, views, and templates (MVT)
+- URL routing and forms
+- User authentication system
+- Database migrations
+
+**Chapter 10: API Development & Integration**
+- RESTful API concepts
+- Django REST framework
+- API authentication and permissions
+- Consuming third-party APIs
+- JSON handling and serialization
+
+**Chapter 11: Automation Scripts & Tools**
+- File system operations
+- Task scheduling and automation
+- Email automation with smtplib
+- GUI development with tkinter
+- Command-line interfaces
+
+**Chapter 12: Introduction to Machine Learning**
+- Machine learning concepts
+- Scikit-learn library basics
+- Supervised vs unsupervised learning
+- Linear regression and classification
+- Model evaluation and validation
+
+### Practical Projects:
+1. **Calculator Application** - Basic Python concepts
+2. **Data Analysis Dashboard** - Pandas and Matplotlib
+3. **Web Scraper** - BeautifulSoup and requests
+4. **Personal Blog** - Django web application
+5. **Expense Tracker** - GUI with tkinter
+6. **Weather API Integration** - REST API consumption
+7. **Machine Learning Predictor** - Scikit-learn model
+
+### Tools & Setup:
+- Python 3.9+ installation
+- PyCharm or VS Code IDE
+- Jupyter Notebook for data science
+- Virtual environments (venv)
+- Git for version control
+
+### Prerequisites:
+- Basic computer skills
+- Mathematical thinking (helpful but not required)
+- Willingness to practice coding regularly
+
+### Course Duration: 15 Hours
+- Progressive skill building
+- Hands-on coding exercises
+- Real-world applications
+- Complete project source code
+
+### Career Applications:
+- Web Development (Django, Flask)
+- Data Science and Analytics
+- Machine Learning Engineering
+- Process Automation
+- API Development
+- Desktop Application Development
+
+### Resources Included:
+- Complete source code for all projects
+- Dataset files for practice
+- Cheat sheets and reference guides
+- Links to additional learning resources
+- Community support guidelines
+
+---
+**CourseHub Somalia © 2024**
+*Master Python Programming - From Beginner to Professional*
+*Contact: info@coursehub.so*
