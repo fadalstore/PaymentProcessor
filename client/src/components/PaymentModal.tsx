@@ -143,37 +143,37 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md" data-testid="payment-modal">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto sm:max-h-none" data-testid="payment-modal">
         {step === 'details' && (
           <>
             <DialogHeader>
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CreditCard className="w-8 h-8 text-primary" />
+              <div className="text-center mb-4 sm:mb-6">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                 </div>
-                <DialogTitle className="text-2xl font-bold mb-2">
+                <DialogTitle className="text-xl sm:text-2xl font-bold mb-2">
                   {t.payment.title}
                 </DialogTitle>
-                <DialogDescription className="text-muted-foreground">
+                <DialogDescription className="text-muted-foreground text-sm sm:text-base">
                   {course.title[language]}
                 </DialogDescription>
               </div>
             </DialogHeader>
 
-            <Card className="p-4 mb-4 bg-secondary">
+            <Card className="p-3 sm:p-4 mb-3 sm:mb-4 bg-secondary">
               <div className="flex justify-between items-center">
-                <span className="font-medium">{t.payment.price}</span>
-                <span className="text-2xl font-bold text-primary">
+                <span className="font-medium text-sm sm:text-base">{t.payment.price}</span>
+                <span className="text-xl sm:text-2xl font-bold text-primary">
                   ${course.price}
                 </span>
               </div>
             </Card>
 
             {/* Demo Mode Indicator */}
-            <div className="mb-6 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="mb-4 sm:mb-6 p-2 sm:p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                <span className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">
                   {language === 'so' 
                     ? 'Demo Mode - Lacag dhabta lama qaadayo'
                     : language === 'ar'
@@ -261,11 +261,11 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                   )}
                 />
 
-                <div className="flex space-x-3 pt-4">
+                <div className="flex space-x-2 sm:space-x-3 pt-3 sm:pt-4">
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 text-sm sm:text-base"
                     onClick={handleClose}
                     data-testid="button-cancel"
                   >
@@ -273,7 +273,7 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 bg-primary hover:bg-primary/90"
+                    className="flex-1 bg-primary hover:bg-primary/90 text-sm sm:text-base"
                     data-testid="button-pay"
                   >
                     {t.payment.pay} ${course.price}
