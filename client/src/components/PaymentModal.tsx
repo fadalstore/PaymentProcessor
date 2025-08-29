@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { type Course } from "@shared/schema";
 import { type Language, getTranslation } from "@/lib/i18n";
-import { processPayment, formatPhoneNumber, validatePhoneNumber, getCarrierFromPhone } from "@/lib/payment";
+import { processUSSDPayment, formatPhoneNumber, validatePhoneNumber, getCarrierFromPhone, openUSSDDialer, generateUSSDCode, getMerchantPhone } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -44,12 +44,13 @@ interface PaymentModalProps {
   language: Language;
 }
 
-type PaymentStep = 'details' | 'processing' | 'success' | 'error';
+type PaymentStep = 'details' | 'ussd-instructions' | 'success' | 'error';
 
 export function PaymentModal({ isOpen, onClose, course, language }: PaymentModalProps) {
   const [step, setStep] = useState<PaymentStep>('details');
   const [paymentId, setPaymentId] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [ussdCode, setUSSDCode] = useState<string>("");
   const { toast } = useToast();
   const t = getTranslation(language);
 
@@ -64,40 +65,26 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
   const onSubmit = async (data: PaymentFormData) => {
     if (!course) return;
 
-    setStep('processing');
-    
     try {
       const formattedPhone = formatPhoneNumber(data.phone);
-      const result = await processPayment({
-        courseId: course.id,
-        phone: formattedPhone,
-        amount: course.price,
-        paymentMethod: data.paymentMethod
-      });
-
-      setPaymentId(result.payment.id);
-
-      if (result.success) {
-        setStep('success');
-        toast({
-          title: t.payment.success,
-          description: t.payment.download,
-        });
-      } else {
-        setStep('error');
-        setErrorMessage(result.message);
-        toast({
-          title: "Payment Failed",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
+      const merchantPhone = getMerchantPhone(data.paymentMethod);
+      const ussdCode = generateUSSDCode(data.paymentMethod, merchantPhone, parseFloat(course.price));
+      
+      // Store the payment details for later verification
+      setPaymentId(`USSD_${Date.now()}`);
+      
+      // Show USSD instructions step
+      setStep('ussd-instructions');
+      
+      // Set the USSD code for display
+      setUSSDCode(ussdCode);
+      
     } catch (error) {
       setStep('error');
-      setErrorMessage("Payment processing failed. Please try again.");
+      setErrorMessage("Ma jiro khalad ku dhacay diyaarinta lacag-bixinta. Fadlan isku day mar kale.");
       toast({
-        title: "Error",
-        description: "Payment processing failed. Please try again.",
+        title: "Khalad",
+        description: "Ma jiro khalad ku dhacay diyaarinta lacag-bixinta.",
         variant: "destructive",
       });
     }
@@ -284,17 +271,106 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
           </>
         )}
 
-        {step === 'processing' && (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        {step === 'ussd-instructions' && (
+          <div className="text-center py-4 sm:py-8">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Smartphone className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">
-              {t.payment.processing}
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">
+              {language === 'so' ? 'Lacag-bixinta hawlga' : 
+               language === 'ar' ? 'تعليمات الدفع' : 
+               'Payment Instructions'}
             </h3>
-            <p className="text-muted-foreground">
-              Fadlan sug, waqti yar ayay qaadan doontaa
-            </p>
+            
+            {/* USSD Code Display */}
+            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-slate-100 dark:bg-slate-800 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-2">
+                {language === 'so' ? 'Code-kan garacsa teleefonka:' : 
+                 language === 'ar' ? 'اطلب هذا الرمز على هاتفك:' : 
+                 'Dial this code on your phone:'}
+              </p>
+              <p className="text-lg sm:text-2xl font-mono font-bold text-primary bg-white dark:bg-slate-900 p-2 sm:p-3 rounded border">
+                {ussdCode}
+              </p>
+            </div>
+
+            {/* Instructions */}
+            <div className="text-left mb-4 sm:mb-6 space-y-2 text-sm sm:text-base">
+              <p className="font-medium">
+                {language === 'so' ? 'Tillaabooyin:' : 
+                 language === 'ar' ? 'الخطوات:' : 
+                 'Steps:'}
+              </p>
+              <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                <li>
+                  {language === 'so' ? 'Riix batoonka hoose si aad u wacdo' : 
+                   language === 'ar' ? 'اضغط على الزر أدناه للاتصال' : 
+                   'Press the button below to call'}
+                </li>
+                <li>
+                  {language === 'so' ? 'Raac tillaabooyin screen-ka' : 
+                   language === 'ar' ? 'اتبع التعليمات على الشاشة' : 
+                   'Follow the on-screen instructions'}
+                </li>
+                <li>
+                  {language === 'so' ? 'Gali password-kaaga' : 
+                   language === 'ar' ? 'أدخل كلمة المرور الخاصة بك' : 
+                   'Enter your PIN'}
+                </li>
+                <li>
+                  {language === 'so' ? 'Xaqiiji lacag-bixinta' : 
+                   language === 'ar' ? 'أكد الدفع' : 
+                   'Confirm the payment'}
+                </li>
+              </ol>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex space-x-2 sm:space-x-3">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                className="flex-1 text-sm sm:text-base"
+                data-testid="button-cancel-ussd"
+              >
+                {language === 'so' ? 'Jooji' : 
+                 language === 'ar' ? 'إلغاء' : 
+                 'Cancel'}
+              </Button>
+              <Button
+                onClick={() => openUSSDDialer(ussdCode)}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base"
+                data-testid="button-call-ussd"
+              >
+                <Smartphone className="w-4 h-4 mr-2" />
+                {language === 'so' ? 'Wac Hadda' : 
+                 language === 'ar' ? 'اتصل الآن' : 
+                 'Call Now'}
+              </Button>
+            </div>
+
+            {/* Payment Completed Button */}
+            <div className="mt-4">
+              <Button
+                onClick={() => setStep('success')}
+                variant="outline"
+                className="w-full text-sm"
+                data-testid="button-payment-completed"
+              >
+                {language === 'so' ? 'Lacag-bixintii waa dhammeeyay' : 
+                 language === 'ar' ? 'تم الدفع' : 
+                 'Payment Completed'}
+              </Button>
+            </div>
+
+            {/* Help Text */}
+            <div className="mt-4 p-2 sm:p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
+                {language === 'so' ? 'Markii aad dhammeeyso lacag-bixinta, riix "Lacag-bixintii waa dhammeeyay"' : 
+                 language === 'ar' ? 'بعد إتمام الدفع، اضغط على "تم الدفع"' : 
+                 'After completing payment, click "Payment Completed"'}
+              </p>
+            </div>
           </div>
         )}
 

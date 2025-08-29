@@ -87,3 +87,60 @@ export function getCarrierFromPhone(phone: string): string {
   
   return 'Mobile Carrier';
 }
+
+// Generate USSD code for payment
+export function generateUSSDCode(paymentMethod: string, recipientPhone: string, amount: number): string {
+  const formattedAmount = amount.toFixed(1); // Ensure one decimal place
+  
+  switch (paymentMethod) {
+    case 'evc':
+      // EVC Plus USSD: *770*recipientPhone*amount#
+      return `*770*${recipientPhone}*${formattedAmount}#`;
+    case 'zaad':
+      // ZAAD USSD: *880*recipientPhone*amount#  
+      return `*880*${recipientPhone}*${formattedAmount}#`;
+    case 'edahab':
+      // eDahab USSD: *384*recipientPhone*amount#
+      return `*384*${recipientPhone}*${formattedAmount}#`;
+    default:
+      return `*${recipientPhone}*${formattedAmount}#`;
+  }
+}
+
+// Open phone dialer with USSD code
+export function openUSSDDialer(ussdCode: string): void {
+  // For mobile devices, open the phone dialer with the USSD code
+  const telUrl = `tel:${encodeURIComponent(ussdCode)}`;
+  window.open(telUrl, '_self');
+}
+
+// Get merchant phone number for payment method
+export function getMerchantPhone(paymentMethod: string): string {
+  // These would be your actual merchant phone numbers for each service
+  switch (paymentMethod) {
+    case 'evc':
+      return '634844506'; // Example EVC merchant number
+    case 'zaad':
+      return '634844506'; // Example ZAAD merchant number  
+    case 'edahab':
+      return '634844506'; // Example eDahab merchant number
+    default:
+      return '634844506';
+  }
+}
+
+// Process USSD payment - simplified version that just generates the code
+export async function processUSSDPayment(data: {
+  courseId: string;
+  phone: string;
+  amount: number;
+  paymentMethod: string;
+}): Promise<{ ussdCode: string; merchantPhone: string }> {
+  const merchantPhone = getMerchantPhone(data.paymentMethod);
+  const ussdCode = generateUSSDCode(data.paymentMethod, merchantPhone, data.amount);
+  
+  return {
+    ussdCode,
+    merchantPhone
+  };
+}
