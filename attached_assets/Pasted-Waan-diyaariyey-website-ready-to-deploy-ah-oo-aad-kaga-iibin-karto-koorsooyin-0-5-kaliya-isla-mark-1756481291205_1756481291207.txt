@@ -1,0 +1,47 @@
+Waan diyaariyey website ready-to-deploy ah oo aad kaga iibin karto koorsooyin $0.5 kaliya, isla markiina qofku ka soo degsan karo faylka koorsada marka bixintu xaqiijisanto. Waxay ku shaqaysaa 3 luqadood: Soomaali / English / العربية. Waxa ku jira koorsooyin caan ah (web dev, Python, MS Office, digital marketing, graphic design, video editing) — waad beddeli/ku dari kartaa.
+
+Download the project (ZIP)
+
+Maxaa ku jira?
+	•	Next.js (App Router): front+backend hal meel.
+	•	3-luqadood: /so, /en, /ar (auto-redirect to Somali).
+	•	Qiimo go’an: $0.5 per course.
+	•	Iibsasho & soo-degsi: bog koorso → Pay → Success → download (demo mode ON).
+	•	Payments (stubs ready):
+	•	WaafiPay (EVC Plus / ZAAD / eDahab) + Cards via hosted checkout — endpoints-ka waa diyaarin, waxaad ku gelisaa API keys oo keliya.  ￼ ￼
+	•	Haddii aad rabto eDahab API toos ah, halkan waa hagitaan developer blog.  ￼
+	•	Waxaa jira library Node.js ah oo kaa caawin karta WAAFI/phone formats (“Evc-Plus”).  ￼
+	•	Files: faylasha koorsooyinka (ZIP) waxay ku jiraan public/courses/ (placeholders—ku beddel kuwaaga).
+	•	Hosting free-friendly: Vercel / Render / Netlify (frontend) + Next API routes.
+
+Sida loo shido (degdeg)
+	1.	Fur ZIP → course-shop-waafi-next/.
+	2.	npm i → npm run dev (tijaabo maxalli ah).
+	3.	Deploy
+	•	Vercel: Repo GitHub → Import → ENV vars → Deploy.
+	•	Render: Web Service (Node) → npm run build / npm start.
+	4.	Bixinta dhabta ah
+	•	Samee account merchant WaafiPay, hel API keys, kadib ku buuxi .env (faahfaahinta iyo sandbox-ka waxa ku qoran docs-ka WaafiPay).  ￼
+	•	EVC/ZAAD/eDahab waxaa lagu qaadan karaa WaafiPay hosted page (merchant-config + return/cancel URLs).  ￼ ￼
+	•	(Ikhtiyaar) eDahab API toos ah—eeg hage-kan.  ￼
+
+Mashruucu wuxuu imaanayaa DEMO_MODE (payment fake) si aad u tijaabiso. Markii aad hesho keys: ku dhig .env → DEMO_MODE=false → fur /app/[locale]/pay/route.js oo dhaqaaji call-ka API (skeleton code wuu yaallaa).
+
+Koorsooyinka ku jira (waxaad badali kartaa)
+	•	Web Development (HTML/CSS/JS)
+	•	Python Basics
+	•	MS Office (Word/Excel/PowerPoint)
+	•	Digital Marketing
+	•	Graphic Design (Canva/Photoshop)
+	•	Video Editing (CapCut/Pr)
+
+Payment notes (Somalia & caalami)
+	•	WaafiPay waxay bixisaa mobile wallets (EVC, ZAAD, eDahab) iyo Cards via hosted checkout & API (sandbox quickstart).  ￼
+	•	Qaar ka mid ah nidaamyada (EVC/eDahab/ZAAD) waxay u baahan karaan merchant onboarding gaar ah ama gateway sida WaafiPay si fudud, halkii aad API walba kaligaa ula shaqeyn lahayd.  ￼
+
+Haddii aad rabto inaan:
+	•	ku daro koorsooyin gaar ah + thumbnails,
+	•	ku xiro WaafiPay sandbox hadda (in code-ka la dhammaystiro),
+	•	ama aan ku deploy-gareeyo Vercel/Render oo domain free ah,
+
+iwaa ku sameeyay isla hadda code-kan la joogo—kaliya ii sheeg magaca store-ka iyo logo (haddii aad rabto, waan ku sameeyaa logo minimalist).
