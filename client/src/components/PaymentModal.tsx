@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -153,9 +154,9 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                 <DialogTitle className="text-2xl font-bold mb-2">
                   {t.payment.title}
                 </DialogTitle>
-                <p className="text-muted-foreground">
+                <DialogDescription className="text-muted-foreground">
                   {course.title[language]}
-                </p>
+                </DialogDescription>
               </div>
             </DialogHeader>
 
