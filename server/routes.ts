@@ -5,49 +5,70 @@ import { insertPaymentSchema } from "@shared/schema";
 import { z } from "zod";
 import path from "path";
 
-// Mock WaafiPay integration - replace with actual evc-plus when API keys are available
+// WaafiPay Integration - Supports both demo and production modes
 const processWaafiPayment = async (paymentData: {
   phone: string;
   amount: number;
   paymentMethod: string;
   courseId: string;
 }) => {
-  const demoMode = process.env.DEMO_MODE !== 'false';
+  const hasApiKeys = !!(process.env.WAAFI_MERCHANT_UID && process.env.WAAFI_API_USER_ID && process.env.WAAFI_API_KEY);
+  const demoMode = process.env.DEMO_MODE !== 'false' || !hasApiKeys;
   
   if (demoMode) {
-    // Simulate payment processing in demo mode
+    console.log(`🔄 Demo Mode: Processing ${paymentData.paymentMethod.toUpperCase()} payment for ${paymentData.phone}`);
+    
+    // Simulate realistic payment processing delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Simulate different outcomes based on phone number for testing
+    const lastDigit = parseInt(paymentData.phone.slice(-1));
+    
+    if (lastDigit === 0) {
+      return {
+        success: false,
+        message: `${paymentData.paymentMethod.toUpperCase()} payment failed - Insufficient funds (Demo Mode)`
+      };
+    }
+    
     return {
       success: true,
-      transactionId: `TXN_${Date.now()}`,
-      message: "Payment processed successfully (Demo Mode)"
+      transactionId: `DEMO_TXN_${Date.now()}_${paymentData.paymentMethod.toUpperCase()}`,
+      message: `✅ ${paymentData.paymentMethod.toUpperCase()} payment successful - $${paymentData.amount} (Demo Mode)`
     };
   }
 
-  // In production, use actual WaafiPay integration
+  // Production mode - Real WaafiPay integration
   try {
+    console.log(`💳 Production: Processing real ${paymentData.paymentMethod.toUpperCase()} payment for ${paymentData.phone}`);
+    
     const { payByWaafiPay } = require('evc-plus');
     
     const response = await payByWaafiPay({
       phone: paymentData.phone,
-      amount: paymentData.amount * 100, // Convert to cents
-      merchantUid: process.env.WAAFI_MERCHANT_UID || 'M******',
-      apiUserId: process.env.WAAFI_API_USER_ID || '1******',
-      apiKey: process.env.WAAFI_API_KEY || 'API-*******',
-      description: `Course purchase: ${paymentData.courseId}`,
-      invoiceId: `INV_${Date.now()}`,
-      referenceId: `REF_${Date.now()}`,
+      amount: paymentData.amount,
+      merchantUid: process.env.WAAFI_MERCHANT_UID,
+      apiUserId: process.env.WAAFI_API_USER_ID,
+      apiKey: process.env.WAAFI_API_KEY,
+      description: `CourseHub - ${paymentData.courseId}`,
+      invoiceId: `CH_${Date.now()}`,
+      referenceId: `${paymentData.courseId}_${Date.now()}`,
     });
 
+    const isSuccess = response.responseCode === "2001" || response.responseCode === 2001;
+    
     return {
-      success: response.responseCode === "2001",
-      transactionId: response.transactionId,
-      message: response.responseMsg
+      success: isSuccess,
+      transactionId: response.transactionId || `TXN_${Date.now()}`,
+      message: isSuccess ? 
+        `✅ ${paymentData.paymentMethod.toUpperCase()} payment successful - $${paymentData.amount}` : 
+        `❌ Payment failed: ${response.responseMsg || 'Unknown error'}`
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('WaafiPay payment error:', error);
     return {
       success: false,
-      message: "Payment processing failed"
+      message: `Payment processing failed: ${error.message || 'Network error'}`
     };
   }
 };

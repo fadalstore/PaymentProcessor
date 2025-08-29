@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { type Course } from "@shared/schema";
 import { type Language, getTranslation } from "@/lib/i18n";
-import { processPayment, formatPhoneNumber, validatePhoneNumber } from "@/lib/payment";
+import { processPayment, formatPhoneNumber, validatePhoneNumber, getCarrierFromPhone } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -160,7 +160,7 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
               </div>
             </DialogHeader>
 
-            <Card className="p-4 mb-6 bg-secondary">
+            <Card className="p-4 mb-4 bg-secondary">
               <div className="flex justify-between items-center">
                 <span className="font-medium">{t.payment.price}</span>
                 <span className="text-2xl font-bold text-primary">
@@ -168,6 +168,27 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                 </span>
               </div>
             </Card>
+
+            {/* Demo Mode Indicator */}
+            <div className="mb-6 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                  {language === 'so' 
+                    ? 'Demo Mode - Lacag dhabta lama qaadayo'
+                    : language === 'ar'
+                    ? 'وضع التجريب - لا يتم أخذ أموال حقيقية'
+                    : 'Demo Mode - No real money charged'}
+                </span>
+              </div>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                {language === 'so'
+                  ? 'Markii API keys-ka la galiyo, lacag-bixinta dhab ah ayaa bilaaban doonta'
+                  : language === 'ar' 
+                  ? 'عند إدراج مفاتيح API، سيبدأ الدفع الحقيقي'
+                  : 'Real payments will start once API keys are configured'}
+              </p>
+            </div>
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -178,11 +199,27 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                     <FormItem>
                       <FormLabel>{t.payment.phone}</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="252615123456"
-                          {...field}
-                          data-testid="input-phone"
-                        />
+                        <div className="space-y-2">
+                          <Input
+                            placeholder="252615123456 (Hormuud/EVC) ama 252634567890 (Telesom/ZAAD)"
+                            {...field}
+                            data-testid="input-phone"
+                            onChange={(e) => {
+                              field.onChange(e);
+                              // Show carrier info as user types
+                              const phone = e.target.value;
+                              if (validatePhoneNumber(phone)) {
+                                const carrier = getCarrierFromPhone(phone);
+                                console.log(`Detected carrier: ${carrier}`);
+                              }
+                            }}
+                          />
+                          {field.value && validatePhoneNumber(field.value) && (
+                            <p className="text-xs text-green-600 font-medium">
+                              ✓ {getCarrierFromPhone(field.value)}
+                            </p>
+                          )}
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
