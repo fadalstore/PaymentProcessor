@@ -218,6 +218,38 @@ export class MemStorage implements IStorage {
           "Commercial Video Production"
         ],
         createdAt: new Date()
+      },
+      {
+        id: "business-management",
+        title: {
+          so: "Business Management Essentials",
+          en: "Complete Business Management Course",
+          ar: "دورة إدارة الأعمال الشاملة"
+        },
+        description: {
+          so: "Koorso buuxa oo Business Management ah: Leadership, Finance, Marketing, Operations, HR. Waxaad baran doontaa sidaad u maamuusho ganacsiga yar iyo weyn.",
+          en: "Complete Business Management course covering Leadership, Finance, Marketing, Operations, HR. Learn to manage small and large businesses effectively with real-world strategies.",
+          ar: "دورة إدارة الأعمال الشاملة تغطي القيادة والمالية والتسويق والعمليات والموارد البشرية. تعلم إدارة الأعمال الصغيرة والكبيرة بفعالية مع استراتيجيات العالم الحقيقي."
+        },
+        category: "Business",
+        price: "0.50",
+        duration: "14 saac",
+        rating: "4.8",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300",
+        fileUrl: "/courses/business-management-essentials.pdf",
+        curriculum: [
+          "Business Fundamentals & Strategy",
+          "Leadership and Team Management",
+          "Financial Planning & Budgeting",
+          "Marketing & Customer Acquisition",
+          "Operations and Supply Chain",
+          "Human Resources Management",
+          "Project Management Essentials",
+          "Digital Transformation for Business",
+          "Risk Management & Compliance",
+          "Growth Strategies & Scaling"
+        ],
+        createdAt: new Date()
       }
     ];
 
@@ -237,10 +269,16 @@ export class MemStorage implements IStorage {
   async createCourse(insertCourse: InsertCourse): Promise<Course> {
     const id = randomUUID();
     const course: Course = {
-      ...insertCourse,
       id,
+      title: insertCourse.title,
+      description: insertCourse.description,
+      category: insertCourse.category,
       price: insertCourse.price || "0.50",
+      duration: insertCourse.duration,
       rating: insertCourse.rating || "4.5",
+      image: insertCourse.image,
+      fileUrl: insertCourse.fileUrl,
+      curriculum: insertCourse.curriculum,
       createdAt: new Date(),
     };
     this.courses.set(id, course);
