@@ -1,4 +1,4 @@
-import { type Course, type InsertCourse, type Payment, type InsertPayment } from "@shared/schema";
+import { type Course, type InsertCourse, type Payment, type InsertPayment, type AdminUser, type InsertAdminUser } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -6,6 +6,8 @@ export interface IStorage {
   getAllCourses(): Promise<Course[]>;
   getCourse(id: string): Promise<Course | undefined>;
   createCourse(course: InsertCourse): Promise<Course>;
+  updateCourse(id: string, course: Partial<InsertCourse>): Promise<Course | undefined>;
+  deleteCourse(id: string): Promise<boolean>;
   
   // Payment methods
   createPayment(payment: InsertPayment): Promise<Payment>;
@@ -13,16 +15,25 @@ export interface IStorage {
   updatePaymentStatus(id: string, status: string, transactionId?: string): Promise<Payment | undefined>;
   getPaymentsByPhone(phone: string): Promise<Payment[]>;
   getCompletedPaymentForCourse(courseId: string, phone: string): Promise<Payment | undefined>;
+  getAllPayments(): Promise<Payment[]>;
+  
+  // Admin methods
+  createAdminUser(adminUser: InsertAdminUser): Promise<AdminUser>;
+  getAdminByUsername(username: string): Promise<AdminUser | undefined>;
+  getAllAdmins(): Promise<AdminUser[]>;
 }
 
 export class MemStorage implements IStorage {
   private courses: Map<string, Course>;
   private payments: Map<string, Payment>;
+  private adminUsers: Map<string, AdminUser>;
 
   constructor() {
     this.courses = new Map();
     this.payments = new Map();
+    this.adminUsers = new Map();
     this.initializeCourses();
+    this.initializeAdminUser();
   }
 
   private initializeCourses() {
@@ -323,6 +334,69 @@ export class MemStorage implements IStorage {
     return Array.from(this.payments.values()).find(
       p => p.courseId === courseId && p.phone === phone && p.status === "completed"
     );
+  }
+
+  async updateCourse(id: string, courseUpdate: Partial<InsertCourse>): Promise<Course | undefined> {
+    const course = this.courses.get(id);
+    if (course) {
+      const updatedCourse: Course = { 
+        ...course, 
+        ...courseUpdate,
+        curriculum: courseUpdate.curriculum || course.curriculum
+      };
+      this.courses.set(id, updatedCourse);
+      return updatedCourse;
+    }
+    return undefined;
+  }
+
+  async deleteCourse(id: string): Promise<boolean> {
+    return this.courses.delete(id);
+  }
+
+  async getAllPayments(): Promise<Payment[]> {
+    return Array.from(this.payments.values());
+  }
+
+  private async initializeAdminUser() {
+    const bcrypt = await import('bcrypt');
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    
+    const defaultAdmin: AdminUser = {
+      id: randomUUID(),
+      username: 'admin',
+      password: hashedPassword,
+      name: 'Administrator',
+      phone: '252634844506',
+      createdAt: new Date()
+    };
+    
+    this.adminUsers.set(defaultAdmin.username, defaultAdmin);
+  }
+
+  async createAdminUser(insertAdmin: InsertAdminUser): Promise<AdminUser> {
+    const bcrypt = await import('bcrypt');
+    const hashedPassword = await bcrypt.hash(insertAdmin.password, 10);
+    
+    const admin: AdminUser = {
+      id: randomUUID(),
+      username: insertAdmin.username,
+      password: hashedPassword,
+      name: insertAdmin.name,
+      phone: insertAdmin.phone,
+      createdAt: new Date()
+    };
+    
+    this.adminUsers.set(admin.username, admin);
+    return admin;
+  }
+
+  async getAdminByUsername(username: string): Promise<AdminUser | undefined> {
+    return this.adminUsers.get(username);
+  }
+
+  async getAllAdmins(): Promise<AdminUser[]> {
+    return Array.from(this.adminUsers.values());
   }
 }
 

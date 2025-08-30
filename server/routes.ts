@@ -1,9 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPaymentSchema } from "@shared/schema";
+import { insertPaymentSchema, insertCourseSchema, insertAdminUserSchema } from "@shared/schema";
 import { z } from "zod";
 import path from "path";
+import session from "express-session";
+import bcrypt from "bcrypt";
 
 // WaafiPay Integration - Supports both demo and production modes
 const processWaafiPayment = async (paymentData: {
@@ -73,7 +75,25 @@ const processWaafiPayment = async (paymentData: {
   }
 };
 
+// Admin authentication middleware
+const requireAdmin = (req: any, res: any, next: any) => {
+  if (!req.session?.adminId) {
+    return res.status(401).json({ message: "Admin authentication required" });
+  }
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure session middleware
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'coursehub-secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Set to true in production with HTTPS
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    }
+  }));
   // Get all courses
   app.get("/api/courses", async (req, res) => {
     try {
@@ -199,6 +219,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Download error:', error);
       res.status(500).json({ message: "Failed to download course" });
+    }
+  });
+
+  // Admin Authentication Routes
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password required" });
+      }
+
+      const admin = await storage.getAdminByUsername(username);
+      if (!admin) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, admin.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Set session
+      (req.session as any).adminId = admin.id;
+      (req.session as any).adminUsername = admin.username;
+
+      res.json({ 
+        success: true, 
+        admin: { 
+          id: admin.id, 
+          username: admin.username, 
+          name: admin.name 
+        } 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/admin/logout", (req, res) => {
+    req.session?.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  app.get("/api/admin/check", (req, res) => {
+    const isLoggedIn = !!(req.session as any)?.adminId;
+    res.json({ 
+      isLoggedIn,
+      admin: isLoggedIn ? {
+        id: (req.session as any).adminId,
+        username: (req.session as any).adminUsername
+      } : null
+    });
+  });
+
+  // Admin Course Management Routes
+  app.post("/api/admin/courses", requireAdmin, async (req, res) => {
+    try {
+      const courseData = insertCourseSchema.parse(req.body);
+      const course = await storage.createCourse(courseData);
+      res.json(course);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid course data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create course" });
+    }
+  });
+
+  app.put("/api/admin/courses/:id", requireAdmin, async (req, res) => {
+    try {
+      const courseData = insertCourseSchema.partial().parse(req.body);
+      const course = await storage.updateCourse(req.params.id, courseData);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      res.json(course);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid course data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update course" });
+    }
+  });
+
+  app.delete("/api/admin/courses/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteCourse(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete course" });
+    }
+  });
+
+  // Admin Analytics Routes
+  app.get("/api/admin/payments", requireAdmin, async (req, res) => {
+    try {
+      const payments = await storage.getAllPayments();
+      res.json(payments);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  app.get("/api/admin/analytics", requireAdmin, async (req, res) => {
+    try {
+      const [courses, payments] = await Promise.all([
+        storage.getAllCourses(),
+        storage.getAllPayments()
+      ]);
+
+      const totalRevenue = payments
+        .filter(p => p.status === "completed")
+        .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+
+      const paymentsByMethod = payments.reduce((acc, p) => {
+        acc[p.paymentMethod] = (acc[p.paymentMethod] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      res.json({
+        totalCourses: courses.length,
+        totalPayments: payments.length,
+        completedPayments: payments.filter(p => p.status === "completed").length,
+        totalRevenue: totalRevenue.toFixed(2),
+        paymentsByMethod
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch analytics" });
     }
   });
 

@@ -28,6 +28,15 @@ export const payments = pgTable("payments", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const adminUsers = pgTable("admin_users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: varchar("username").unique().notNull(),
+  password: text("password").notNull(), // hashed password
+  name: varchar("name").notNull(),
+  phone: varchar("phone").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertCourseSchema = createInsertSchema(courses).omit({
   id: true,
   createdAt: true,
@@ -40,7 +49,14 @@ export const insertPaymentSchema = createInsertSchema(payments).omit({
   transactionId: true,
 });
 
+export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type AdminUser = typeof adminUsers.$inferSelect;
+export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;

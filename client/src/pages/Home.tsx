@@ -9,6 +9,7 @@ import { PaymentModal } from "@/components/PaymentModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { GraduationCap, Users, Star, Smartphone, Download, Award, Rocket, Menu } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Home() {
   const { language } = useLanguage();
@@ -392,6 +393,13 @@ export default function Home() {
             <p className="text-muted-foreground" data-testid="footer-copyright">
               {t.footer.copyright}
             </p>
+            <div className="mt-4">
+              <Link href="/admin/login">
+                <span className="text-xs text-muted-foreground hover:text-primary cursor-pointer">
+                  Admin
+                </span>
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
