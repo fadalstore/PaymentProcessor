@@ -36,17 +36,28 @@ export function formatPhoneNumber(phone: string): string {
   // Remove all non-digits
   const digits = phone.replace(/\D/g, '');
   
-  // Handle Somalia country code (252)
-  if (digits.startsWith('252')) {
+  // Handle full country codes
+  if (digits.startsWith('25261') || digits.startsWith('25263')) {
+    return digits;
+  }
+  // Handle legacy Somalia country code (252) - default to Somalia
+  else if (digits.startsWith('252')) {
     return digits;
   } 
-  // Handle local numbers starting with 6 or 9 (common in Somalia/Somaliland)
-  else if (digits.startsWith('6') || digits.startsWith('9')) {
-    return '252' + digits;
+  // Handle local numbers starting with 6 (Somaliland) - add 25263
+  else if (digits.startsWith('6')) {
+    return '25263' + digits;
   }
-  // Handle numbers starting with 0 (remove the 0 and add 252)
-  else if (digits.startsWith('0') && (digits.startsWith('06') || digits.startsWith('09'))) {
-    return '252' + digits.substring(1);
+  // Handle local numbers starting with 9 (Somalia) - add 25261  
+  else if (digits.startsWith('9')) {
+    return '25261' + digits;
+  }
+  // Handle numbers starting with 0 (remove the 0)
+  else if (digits.startsWith('06')) {
+    return '25263' + digits.substring(1);
+  }
+  else if (digits.startsWith('09')) {
+    return '25261' + digits.substring(1);
   }
   
   return digits;
@@ -55,19 +66,27 @@ export function formatPhoneNumber(phone: string): string {
 export function validatePhoneNumber(phone: string): boolean {
   const formatted = formatPhoneNumber(phone);
   
-  // Somalia/Somaliland mobile numbers:
-  // 252 + 6XXXXXXX (Somtel, Telesom/Zaad in Somaliland)
-  // 252 + 9XXXXXXX (Hormuud/EVC in Somalia)
-  // Total: 252 + 8 digits = 11 digits
-  const isValidSomalia = /^252[69]\d{7}$/.test(formatted);
+  // Somalia mobile numbers: 25261 + 8 digits = 13 digits total
+  // Somaliland mobile numbers: 25263 + 8 digits = 13 digits total
+  const isValidSomalia = /^25261[69]\d{7}$/.test(formatted);
+  const isValidSomaliland = /^25263[69]\d{7}$/.test(formatted);
   
-  // Additional validation for specific carriers
-  if (isValidSomalia) {
-    const carrierCode = formatted.substring(3, 5);
+  // Legacy 252 support (11 digits)
+  const isValidLegacy = /^252[69]\d{7}$/.test(formatted);
+  
+  if (isValidSomalia || isValidSomaliland) {
+    const carrierCode = formatted.substring(5, 7); // Adjusted for new format
     
     // Common carrier codes:
     // 90, 91, 92 - Hormuud (EVC Plus)
     // 60, 61, 62, 63 - Telesom (ZAAD), Somtel
+    const validCodes = ['90', '91', '92', '60', '61', '62', '63', '65', '66', '67'];
+    return validCodes.some(code => carrierCode.startsWith(code[0]) || carrierCode === code);
+  }
+  
+  // Legacy validation for backward compatibility
+  if (isValidLegacy) {
+    const carrierCode = formatted.substring(3, 5);
     const validCodes = ['90', '91', '92', '60', '61', '62', '63', '65', '66', '67'];
     return validCodes.some(code => carrierCode.startsWith(code[0]) || carrierCode === code);
   }
@@ -80,12 +99,31 @@ export function getCarrierFromPhone(phone: string): string {
   const formatted = formatPhoneNumber(phone);
   if (!validatePhoneNumber(phone)) return 'Unknown';
   
-  const carrierCode = formatted.substring(3, 5);
+  // Determine country and carrier
+  let country = '';
+  let carrierCode = '';
   
-  if (carrierCode.startsWith('9')) return 'Hormuud (EVC Plus)';
-  if (carrierCode.startsWith('6')) return 'Telesom/Somtel (ZAAD)';
+  if (formatted.startsWith('25261')) {
+    country = 'Somalia';
+    carrierCode = formatted.substring(5, 7);
+  } else if (formatted.startsWith('25263')) {
+    country = 'Somaliland';
+    carrierCode = formatted.substring(5, 7);
+  } else if (formatted.startsWith('252')) {
+    country = 'Somalia/Somaliland';
+    carrierCode = formatted.substring(3, 5);
+  }
   
-  return 'Mobile Carrier';
+  let carrier = '';
+  if (carrierCode.startsWith('9')) {
+    carrier = 'Hormuud (EVC Plus)';
+  } else if (carrierCode.startsWith('6')) {
+    carrier = 'Telesom/Somtel (ZAAD)';
+  } else {
+    carrier = 'Mobile Carrier';
+  }
+  
+  return country ? `${carrier} - ${country}` : carrier;
 }
 
 // Generate USSD code for payment
