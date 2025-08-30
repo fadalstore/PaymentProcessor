@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -188,12 +188,18 @@ export default function AdminDashboard() {
     },
   });
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !authData?.isLoggedIn) {
+      setLocation("/admin/login");
+    }
+  }, [authLoading, authData?.isLoggedIn, setLocation]);
+
   if (authLoading) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
   if (!authData?.isLoggedIn) {
-    setLocation("/admin/login");
     return null;
   }
 
