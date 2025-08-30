@@ -32,7 +32,7 @@ export async function checkCourseAccess(courseId: string, phone: string) {
   return response.json();
 }
 
-export function formatPhoneNumber(phone: string): string {
+export function formatPhoneNumber(phone: string, paymentMethod?: string): string {
   // Remove all non-digits
   const digits = phone.replace(/\D/g, '');
   
@@ -40,31 +40,47 @@ export function formatPhoneNumber(phone: string): string {
   if (digits.startsWith('25261') || digits.startsWith('25263')) {
     return digits;
   }
-  // Handle legacy Somalia country code (252) - default to Somalia
+  // Handle legacy Somalia country code (252)
   else if (digits.startsWith('252')) {
     return digits;
   } 
-  // Handle local numbers starting with 6 (Somaliland) - add 25263
-  else if (digits.startsWith('6')) {
-    return '25263' + digits;
+  
+  // Context-aware formatting based on payment method
+  if (paymentMethod) {
+    if (paymentMethod === 'zaad') {
+      // ZAAD is Somaliland service - use 25263
+      if (digits.startsWith('6')) {
+        return '25263' + digits;
+      }
+      else if (digits.startsWith('06')) {
+        return '25263' + digits.substring(1);
+      }
+    } else if (paymentMethod === 'evc' || paymentMethod === 'edahab') {
+      // EVC Plus and eDahab are Somalia services - use 25261
+      if (digits.startsWith('9')) {
+        return '25261' + digits;
+      }
+      else if (digits.startsWith('09')) {
+        return '25261' + digits.substring(1);
+      }
+    }
   }
-  // Handle local numbers starting with 9 (Somalia) - add 25261  
-  else if (digits.startsWith('9')) {
-    return '25261' + digits;
+  
+  // Fallback: Default behavior without context
+  if (digits.startsWith('6') || digits.startsWith('06')) {
+    const cleanDigits = digits.startsWith('06') ? digits.substring(1) : digits;
+    return '25263' + cleanDigits; // Default Somaliland for 6x numbers
   }
-  // Handle numbers starting with 0 (remove the 0)
-  else if (digits.startsWith('06')) {
-    return '25263' + digits.substring(1);
-  }
-  else if (digits.startsWith('09')) {
-    return '25261' + digits.substring(1);
+  if (digits.startsWith('9') || digits.startsWith('09')) {
+    const cleanDigits = digits.startsWith('09') ? digits.substring(1) : digits;
+    return '25261' + cleanDigits; // Default Somalia for 9x numbers
   }
   
   return digits;
 }
 
-export function validatePhoneNumber(phone: string): boolean {
-  const formatted = formatPhoneNumber(phone);
+export function validatePhoneNumber(phone: string, paymentMethod?: string): boolean {
+  const formatted = formatPhoneNumber(phone, paymentMethod);
   
   // Somalia mobile numbers: 25261 + 8 digits = 13 digits total
   // Somaliland mobile numbers: 25263 + 8 digits = 13 digits total
@@ -95,9 +111,9 @@ export function validatePhoneNumber(phone: string): boolean {
 }
 
 // Helper function to get carrier name from phone number
-export function getCarrierFromPhone(phone: string): string {
-  const formatted = formatPhoneNumber(phone);
-  if (!validatePhoneNumber(phone)) return 'Unknown';
+export function getCarrierFromPhone(phone: string, paymentMethod?: string): string {
+  const formatted = formatPhoneNumber(phone, paymentMethod);
+  if (!validatePhoneNumber(phone, paymentMethod)) return 'Unknown';
   
   // Determine country and carrier
   let country = '';
@@ -152,18 +168,18 @@ export function openUSSDDialer(ussdCode: string): void {
   window.open(telUrl, '_self');
 }
 
-// Get merchant phone number for payment method
+// Get merchant phone number for payment method with correct country code
 export function getMerchantPhone(paymentMethod: string): string {
   // These would be your actual merchant phone numbers for each service
   switch (paymentMethod) {
     case 'evc':
-      return '634844506'; // Example EVC merchant number
+      return '25261634844506'; // Somalia EVC merchant number
     case 'zaad':
-      return '634844506'; // Example ZAAD merchant number  
+      return '25263634844506'; // Somaliland ZAAD merchant number  
     case 'edahab':
-      return '634844506'; // Example eDahab merchant number
+      return '25261634844506'; // Somalia eDahab merchant number
     default:
-      return '634844506';
+      return '25261634844506';
   }
 }
 

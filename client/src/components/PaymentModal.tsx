@@ -1,10 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { type Course } from "@shared/schema";
 import { type Language, getTranslation } from "@/lib/i18n";
 import { processUSSDPayment, formatPhoneNumber, validatePhoneNumber, getCarrierFromPhone, openUSSDDialer, generateUSSDCode, getMerchantPhone } from "@/lib/payment";
+
+// Get country code prefix based on payment method
+function getCountryPrefix(paymentMethod: string): string {
+  switch (paymentMethod) {
+    case 'zaad':
+      return '25263'; // Somaliland
+    case 'evc':
+    case 'edahab':
+      return '25261'; // Somalia
+    default:
+      return '252'; // Default
+  }
+}
+
+// Get placeholder text based on payment method
+function getPhonePlaceholder(paymentMethod?: string): string {
+  if (!paymentMethod) return "Gali lambarka telefoonka";
+  
+  switch (paymentMethod) {
+    case 'zaad':
+      return "25263634567890 (ZAAD - Somaliland)";
+    case 'evc':
+      return "25261615123456 (EVC Plus - Somalia)";
+    case 'edahab':
+      return "25261615123456 (eDahab - Somalia)";
+    default:
+      return "Gali lambarka telefoonka";
+  }
+}
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -28,8 +57,7 @@ import { Loader2, CreditCard, Smartphone, Wallet, DollarSign, CheckCircle, Downl
 
 const paymentSchema = z.object({
   phone: z.string()
-    .min(8, "Phone number is required")
-    .refine(validatePhoneNumber, "Invalid Somalia phone number"),
+    .min(8, "Phone number is required"),
   paymentMethod: z.enum(["evc", "zaad", "edahab"], {
     required_error: "Please select a payment method"
   })
@@ -59,14 +87,35 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
     defaultValues: {
       phone: "",
       paymentMethod: undefined
-    }
+    },
+    mode: "onChange"
   });
+  
+  const selectedPaymentMethod = form.watch('paymentMethod');
+  
+  // Custom validation that considers payment method
+  const validatePhoneWithContext = (phone: string) => {
+    if (!phone || phone.length < 8) return false;
+    return validatePhoneNumber(phone, selectedPaymentMethod);
+  };
+  
+  // Auto-reformat phone number when payment method changes
+  useEffect(() => {
+    const currentPhone = form.getValues().phone;
+    if (selectedPaymentMethod && currentPhone && currentPhone.length >= 8) {
+      const reformatted = formatPhoneNumber(currentPhone, selectedPaymentMethod);
+      if (reformatted !== currentPhone) {
+        form.setValue('phone', reformatted);
+        form.trigger('phone');
+      }
+    }
+  }, [selectedPaymentMethod, form]);
 
   const onSubmit = async (data: PaymentFormData) => {
     if (!course) return;
 
     try {
-      const formattedPhone = formatPhoneNumber(data.phone);
+      const formattedPhone = formatPhoneNumber(data.phone, data.paymentMethod);
       const merchantPhone = getMerchantPhone(data.paymentMethod);
       const ussdCode = generateUSSDCode(data.paymentMethod, merchantPhone, parseFloat(course.price));
       
@@ -93,7 +142,7 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
   const handleDownload = () => {
     if (!course) return;
     
-    const phone = formatPhoneNumber(form.getValues().phone);
+    const phone = formatPhoneNumber(form.getValues().phone, form.getValues().paymentMethod);
     const downloadUrl = `/api/download/${course.id}/${phone}`;
     
     // Create a temporary link to trigger download
@@ -182,28 +231,70 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                 <FormField
                   control={form.control}
                   name="phone"
+                  rules={{
+                    validate: (value) => {
+                      if (!value || value.length < 8) {
+                        return "Lambarka telefoonka waa lagama maarmaan";
+                      }
+                      if (!selectedPaymentMethod) {
+                        return "Fadlan dooro hab lacag-bixin";
+                      }
+                      if (!validatePhoneWithContext(value)) {
+                        return selectedPaymentMethod === 'zaad' 
+                          ? "Lambar Somaliland oo sax ah gali (25263)" 
+                          : "Lambar Somalia oo sax ah gali (25261)";
+                      }
+                      return true;
+                    }
+                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t.payment.phone}</FormLabel>
                       <FormControl>
                         <div className="space-y-2">
-                          <Input
-                            placeholder="252615123456 (Hormuud/EVC) ama 252634567890 (Telesom/ZAAD)"
-                            {...field}
-                            data-testid="input-phone"
-                            onChange={(e) => {
-                              field.onChange(e);
-                              // Show carrier info as user types
-                              const phone = e.target.value;
-                              if (validatePhoneNumber(phone)) {
-                                const carrier = getCarrierFromPhone(phone);
-                                console.log(`Detected carrier: ${carrier}`);
-                              }
-                            }}
-                          />
-                          {field.value && validatePhoneNumber(field.value) && (
+                          <div className="relative">
+                            <Input
+                              placeholder={getPhonePlaceholder(selectedPaymentMethod)}
+                              {...field}
+                              data-testid="input-phone"
+                              onChange={(e) => {
+                                let inputValue = e.target.value;
+                                
+                                // Auto-format based on payment method selection
+                                if (selectedPaymentMethod && inputValue.length >= 8 && !inputValue.startsWith('252')) {
+                                  const prefix = getCountryPrefix(selectedPaymentMethod);
+                                  if (!inputValue.startsWith(prefix)) {
+                                    inputValue = formatPhoneNumber(inputValue, selectedPaymentMethod);
+                                  }
+                                }
+                                
+                                field.onChange(inputValue);
+                                
+                                // Show carrier info as user types
+                                if (validatePhoneNumber(inputValue, selectedPaymentMethod)) {
+                                  const carrier = getCarrierFromPhone(inputValue, selectedPaymentMethod);
+                                  console.log(`Detected carrier: ${carrier}`);
+                                }
+                              }}
+                            />
+                            {selectedPaymentMethod && (
+                              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <span className="text-xs text-muted-foreground font-mono">
+                                  {getCountryPrefix(selectedPaymentMethod)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          {field.value && validatePhoneNumber(field.value, selectedPaymentMethod) && (
                             <p className="text-xs text-green-600 font-medium">
-                              ✓ {getCarrierFromPhone(field.value)}
+                              ✓ {getCarrierFromPhone(field.value, selectedPaymentMethod)}
+                            </p>
+                          )}
+                          {selectedPaymentMethod && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {selectedPaymentMethod === 'zaad' 
+                                ? "✓ ZAAD waxaa loo isticmaalaa Somaliland (25263)"
+                                : "✓ EVC Plus/eDahab waxaa loo isticmaalaa Somalia (25261)"}
                             </p>
                           )}
                         </div>
@@ -227,7 +318,16 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                             <button
                               key={method.id}
                               type="button"
-                              onClick={() => field.onChange(method.id)}
+                              onClick={() => {
+                                field.onChange(method.id);
+                                // Auto-update phone number format when payment method changes
+                                const currentPhone = form.getValues().phone;
+                                if (currentPhone && currentPhone.length >= 8) {
+                                  const reformatted = formatPhoneNumber(currentPhone, method.id);
+                                  form.setValue('phone', reformatted);
+                                  form.trigger('phone');
+                                }
+                              }}
                               className={`flex flex-col items-center p-3 border rounded-lg transition-colors ${
                                 isSelected
                                   ? 'border-primary bg-primary/5'
