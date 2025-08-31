@@ -289,7 +289,7 @@ export class MemStorage implements IStorage {
       rating: insertCourse.rating || "4.5",
       image: insertCourse.image,
       fileUrl: insertCourse.fileUrl,
-      curriculum: insertCourse.curriculum,
+      curriculum: Array.isArray(insertCourse.curriculum) ? insertCourse.curriculum : [],
       createdAt: new Date(),
     };
     this.courses.set(id, course);
@@ -342,7 +342,7 @@ export class MemStorage implements IStorage {
       const updatedCourse: Course = { 
         ...course, 
         ...courseUpdate,
-        curriculum: courseUpdate.curriculum || course.curriculum
+        curriculum: courseUpdate.curriculum ? (Array.isArray(courseUpdate.curriculum) ? courseUpdate.curriculum : []) : course.curriculum
       };
       this.courses.set(id, updatedCourse);
       return updatedCourse;

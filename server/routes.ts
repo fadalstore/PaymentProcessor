@@ -5,6 +5,7 @@ import { insertPaymentSchema, insertCourseSchema, insertAdminUserSchema } from "
 import { z } from "zod";
 import path from "path";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import bcrypt from "bcrypt";
 import Stripe from "stripe";
 
@@ -100,16 +101,31 @@ const requireAdmin = (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Configure session middleware
-  app.use(session({
+  // Configure session middleware with PostgreSQL store for production
+  const PgStore = connectPgSimple(session);
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  const sessionConfig: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || 'coursehub-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Set to true in production with HTTPS
+      secure: isProduction, // HTTPS only in production
+      httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     }
-  }));
+  };
+
+  // Use PostgreSQL session store in production
+  if (isProduction && process.env.DATABASE_URL) {
+    sessionConfig.store = new PgStore({
+      conString: process.env.DATABASE_URL,
+      tableName: 'session',
+      createTableIfMissing: true,
+    });
+  }
+
+  app.use(session(sessionConfig));
   // Get all courses
   // Health check endpoint for deployment monitoring
   app.get("/api/health", (req, res) => {

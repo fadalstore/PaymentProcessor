@@ -12,6 +12,8 @@ services:
         fromDatabase:
           name: coursehub-db
           property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
       - key: SLACK_BOT_TOKEN
         sync: false
       - key: SLACK_CHANNEL_ID
