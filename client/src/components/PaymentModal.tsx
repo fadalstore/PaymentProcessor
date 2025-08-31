@@ -210,15 +210,15 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto sm:max-h-none" data-testid="payment-modal">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto sm:max-h-none glass-effect border-0 shadow-2xl" data-testid="payment-modal">
         {step === 'details' && (
           <>
             <DialogHeader>
               <div className="text-center mb-4 sm:mb-6">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg">
+                  <CreditCard className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                 </div>
-                <DialogTitle className="text-xl sm:text-2xl font-bold mb-2">
+                <DialogTitle className="text-2xl sm:text-3xl font-bold mb-3 text-gradient bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
                   {t.payment.title}
                 </DialogTitle>
                 <DialogDescription className="text-muted-foreground text-sm sm:text-base">
@@ -227,10 +227,10 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
               </div>
             </DialogHeader>
 
-            <Card className="p-3 sm:p-4 mb-3 sm:mb-4 bg-secondary">
+            <Card className="p-4 sm:p-6 mb-4 sm:mb-6 glass-effect border-0 shadow-lg">
               <div className="flex justify-between items-center">
-                <span className="font-medium text-sm sm:text-base">{t.payment.price}</span>
-                <span className="text-xl sm:text-2xl font-bold text-primary">
+                <span className="font-semibold text-base sm:text-lg">{t.payment.price}</span>
+                <span className="text-2xl sm:text-3xl font-bold text-gradient bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
                   ${course.price}
                 </span>
               </div>
@@ -537,50 +537,50 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
         )}
 
         {step === 'success' && (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+          <div className="text-center py-12">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg animate-bounce">
+              <CheckCircle className="w-10 h-10 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">
+            <h3 className="text-2xl font-bold mb-3 text-gradient bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
               {t.payment.success}
             </h3>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
               Koorsadaada waa diyaar u tahay soo dejinta
             </p>
             <Button
               onClick={handleDownload}
-              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg"
               data-testid="button-download"
             >
-              <Download className="w-4 h-4 mr-2" />
+              <Download className="w-5 h-5 mr-2" />
               {t.payment.download}
             </Button>
           </div>
         )}
 
         {step === 'error' && (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CreditCard className="w-8 h-8 text-red-600" />
+          <div className="text-center py-12">
+            <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
+              <CreditCard className="w-10 h-10 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">
+            <h3 className="text-2xl font-bold mb-3 text-gradient bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
               Payment Failed
             </h3>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
               {errorMessage}
             </p>
-            <div className="flex space-x-3">
+            <div className="flex space-x-4">
               <Button
                 variant="outline"
                 onClick={handleClose}
-                className="flex-1"
+                className="flex-1 py-3 hover:bg-red-50 hover:border-red-200 transition-all duration-300"
                 data-testid="button-close"
               >
                 Close
               </Button>
               <Button
                 onClick={() => setStep('details')}
-                className="flex-1"
+                className="flex-1 py-3 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 transform hover:scale-105 transition-all duration-300"
                 data-testid="button-retry"
               >
                 Try Again

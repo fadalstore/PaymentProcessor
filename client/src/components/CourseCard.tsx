@@ -28,17 +28,20 @@ export function CourseCard({ course, language, onPurchase }: CourseCardProps) {
 
   return (
     <Card 
-      className="overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer"
+      className="overflow-hidden modern-card glass-effect border-0 cursor-pointer group relative"
       data-testid={`course-card-${course.id}`}
     >
-      <img 
-        src={course.image} 
-        alt={course.title[language]}
-        className="w-full h-48 object-cover"
-      />
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-3">
-          <Badge className={getCategoryColor(course.category)}>
+      <div className="relative overflow-hidden">
+        <img 
+          src={course.image} 
+          alt={course.title[language]}
+          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+      <CardContent className="p-6 relative z-10">
+        <div className="flex items-center justify-between mb-4">
+          <Badge className={`${getCategoryColor(course.category)} px-3 py-1 text-xs font-medium rounded-full`}>
             {course.category}
           </Badge>
           <div className="flex items-center text-yellow-500">
@@ -50,14 +53,14 @@ export function CourseCard({ course, language, onPurchase }: CourseCardProps) {
         </div>
         
         <h3 
-          className="text-xl font-semibold mb-2 text-card-foreground"
+          className="text-xl font-bold mb-3 text-card-foreground group-hover:text-primary transition-colors duration-300"
           data-testid={`course-title-${course.id}`}
         >
           {course.title[language]}
         </h3>
         
         <p 
-          className="text-muted-foreground mb-4 line-clamp-2"
+          className="text-muted-foreground mb-6 line-clamp-2 leading-relaxed"
           data-testid={`course-description-${course.id}`}
         >
           {course.description[language]}
@@ -80,7 +83,7 @@ export function CourseCard({ course, language, onPurchase }: CourseCardProps) {
           </div>
           <Button 
             onClick={() => onPurchase(course)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white transform hover:scale-105 transition-all duration-300 shadow-lg"
             data-testid={`button-purchase-${course.id}`}
           >
             {t.courses.buyNow}

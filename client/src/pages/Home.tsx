@@ -76,31 +76,35 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      <header className="sticky top-0 z-50 glass-effect border-b border-white/20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
               {/* Logo */}
-              <div className="flex items-center space-x-2" data-testid="logo">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-primary-foreground" />
+              <div className="flex items-center space-x-3" data-testid="logo">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <GraduationCap className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-xl font-bold text-foreground">CourseHub</span>
+                <span className="text-2xl font-bold text-gradient bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">CourseHub</span>
               </div>
               
               {/* Navigation */}
-              <nav className="hidden md:flex space-x-6">
-                <a href="#" className="text-foreground hover:text-primary transition-colors" data-testid="nav-home">
+              <nav className="hidden md:flex space-x-8">
+                <a href="#" className="text-foreground hover:text-primary transition-all duration-300 font-medium hover:scale-105 relative group" data-testid="nav-home">
                   {t.navigation.home}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all duration-300 group-hover:w-full"></span>
                 </a>
-                <a href="#courses" className="text-foreground hover:text-primary transition-colors" data-testid="nav-courses">
+                <a href="#courses" className="text-foreground hover:text-primary transition-all duration-300 font-medium hover:scale-105 relative group" data-testid="nav-courses">
                   {t.navigation.courses}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all duration-300 group-hover:w-full"></span>
                 </a>
-                <a href="#" className="text-foreground hover:text-primary transition-colors" data-testid="nav-about">
+                <a href="#" className="text-foreground hover:text-primary transition-all duration-300 font-medium hover:scale-105 relative group" data-testid="nav-about">
                   {t.navigation.about}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all duration-300 group-hover:w-full"></span>
                 </a>
-                <a href="#" className="text-foreground hover:text-primary transition-colors" data-testid="nav-contact">
+                <a href="#" className="text-foreground hover:text-primary transition-all duration-300 font-medium hover:scale-105 relative group" data-testid="nav-contact">
                   {t.navigation.contact}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all duration-300 group-hover:w-full"></span>
                 </a>
               </nav>
             </div>
@@ -111,7 +115,7 @@ export default function Home() {
               
               {/* Mobile menu button */}
               <button 
-                className="md:hidden p-2 rounded-md hover:bg-accent"
+                className="md:hidden p-3 rounded-xl glass-effect hover:bg-white/10 transition-all duration-300 transform hover:scale-105"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -146,13 +150,17 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-primary to-blue-600 text-primary-foreground py-20">
-        <div className="absolute inset-0 bg-black/20"></div>
+      <section className="relative gradient-animate text-primary-foreground py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-black/30"></div>
+        {/* Floating geometric shapes */}
+        <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full float-animation" style={{animationDelay: '0s'}}></div>
+        <div className="absolute top-40 right-20 w-16 h-16 bg-white/10 rounded-lg rotate-45 float-animation" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-white/10 rounded-full float-animation" style={{animationDelay: '4s'}}></div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6" data-testid="hero-title">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight" data-testid="hero-title">
               {t.hero.title} <br className="hidden sm:block" />
-              <span className="text-yellow-300">$0.5 kaliya</span>
+              <span className="text-gradient bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">$0.5 kaliya</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-primary-foreground/90" data-testid="hero-subtitle">
               {t.hero.subtitle}
@@ -160,7 +168,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
                 onClick={scrollToCourses}
-                className="bg-yellow-500 hover:bg-yellow-600 text-yellow-950 px-8 py-4 text-lg font-semibold"
+                className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-8 py-4 text-lg font-semibold pulse-glow transform hover:scale-105 transition-all duration-300 shadow-lg"
                 data-testid="button-hero-cta"
               >
                 <Rocket className="w-5 h-5 mr-2" />
@@ -182,7 +190,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-secondary">
+      <section className="py-20 bg-gradient-to-b from-secondary to-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4" data-testid="features-title">
@@ -194,28 +202,37 @@ export default function Home() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow" data-testid="feature-mobile">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Smartphone className="w-8 h-8 text-primary" />
+            <Card className="text-center p-8 modern-card glass-effect border-0 relative overflow-hidden" data-testid="feature-mobile">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <Smartphone className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4">{t.features.mobile.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{t.features.mobile.description}</p>
               </div>
-              <h3 className="text-xl font-semibold mb-3">{t.features.mobile.title}</h3>
-              <p className="text-muted-foreground">{t.features.mobile.description}</p>
             </Card>
             
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow" data-testid="feature-instant">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Download className="w-8 h-8 text-green-600" />
+            <Card className="text-center p-8 modern-card glass-effect border-0 relative overflow-hidden" data-testid="feature-instant">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent"></div>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <Download className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4">{t.features.instant.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{t.features.instant.description}</p>
               </div>
-              <h3 className="text-xl font-semibold mb-3">{t.features.instant.title}</h3>
-              <p className="text-muted-foreground">{t.features.instant.description}</p>
             </Card>
             
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow" data-testid="feature-quality">
-              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Award className="w-8 h-8 text-yellow-600" />
+            <Card className="text-center p-8 modern-card glass-effect border-0 relative overflow-hidden" data-testid="feature-quality">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent"></div>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <Award className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4">{t.features.quality.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{t.features.quality.description}</p>
               </div>
-              <h3 className="text-xl font-semibold mb-3">{t.features.quality.title}</h3>
-              <p className="text-muted-foreground">{t.features.quality.description}</p>
             </Card>
           </div>
         </div>
@@ -266,7 +283,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 bg-secondary">
+      <section className="py-20 bg-gradient-to-b from-background to-secondary">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4" data-testid="testimonials-title">
@@ -276,23 +293,26 @@ export default function Home() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="p-6" data-testid={`testimonial-${index}`}>
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mr-4 text-2xl">
-                    {testimonial.avatar}
+              <Card key={index} className="p-8 modern-card glass-effect border-0 relative overflow-hidden" data-testid={`testimonial-${index}`}>
+                <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-primary to-blue-600"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center mr-4 text-2xl shadow-lg">
+                      {testimonial.avatar}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-card-foreground text-lg">{testimonial.name}</h4>
+                      <p className="text-sm text-primary font-medium">{testimonial.role}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-card-foreground">{testimonial.name}</h4>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  <p className="text-muted-foreground italic mb-4 leading-relaxed text-base">
+                    "{testimonial.comment}"
+                  </p>
+                  <div className="flex text-yellow-500">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-current" />
+                    ))}
                   </div>
-                </div>
-                <p className="text-muted-foreground italic mb-3">
-                  "{testimonial.comment}"
-                </p>
-                <div className="flex text-yellow-500">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
                 </div>
               </Card>
             ))}
@@ -301,8 +321,11 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-blue-600 text-primary-foreground">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="py-24 gradient-animate text-primary-foreground relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full float-animation" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-10 left-10 w-24 h-24 bg-white/10 rounded-lg rotate-12 float-animation" style={{animationDelay: '3s'}}></div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h2 className="text-4xl font-bold mb-6" data-testid="cta-title">
             {t.cta.title}
           </h2>
@@ -311,43 +334,44 @@ export default function Home() {
           </p>
           <Button 
             onClick={scrollToCourses}
-            className="bg-yellow-500 hover:bg-yellow-600 text-yellow-950 px-8 py-4 text-lg font-semibold"
+            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-10 py-5 text-xl font-bold pulse-glow transform hover:scale-105 transition-all duration-300 shadow-xl"
             data-testid="button-cta"
           >
-            <Rocket className="w-5 h-5 mr-2" />
+            <Rocket className="w-6 h-6 mr-3" />
             {t.cta.cta}
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-card border-t border-border py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-16 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-primary-foreground" />
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <GraduationCap className="w-7 h-7 text-white" />
                 </div>
-                <span className="text-xl font-bold text-card-foreground">CourseHub Somalia</span>
+                <span className="text-2xl font-bold text-white">CourseHub Somalia</span>
               </div>
-              <p className="text-muted-foreground mb-4" data-testid="footer-description">
+              <p className="text-gray-300 mb-6 leading-relaxed text-lg" data-testid="footer-description">
                 {t.footer.description}
               </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <div className="flex space-x-6">
+                <a href="#" className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-300 transform hover:scale-110 text-xl">
                   <span className="sr-only">Facebook</span>
                   📘
                 </a>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <a href="#" className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-300 transform hover:scale-110 text-xl">
                   <span className="sr-only">Twitter</span>
                   🐦
                 </a>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <a href="#" className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-300 transform hover:scale-110 text-xl">
                   <span className="sr-only">Instagram</span>
                   📸
                 </a>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <a href="#" className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-300 transform hover:scale-110 text-xl">
                   <span className="sr-only">Telegram</span>
                   ✈️
                 </a>
@@ -355,25 +379,25 @@ export default function Home() {
             </div>
             
             <div>
-              <h4 className="font-semibold text-card-foreground mb-4">{t.footer.courses.title}</h4>
+              <h4 className="font-bold text-white mb-4 text-lg">{t.footer.courses.title}</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">{t.footer.courses.webdev}</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">{t.footer.courses.python}</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">{t.footer.courses.office}</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">{t.footer.courses.marketing}</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-all duration-300 hover:translate-x-2">{t.footer.courses.webdev}</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-all duration-300 hover:translate-x-2">{t.footer.courses.python}</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-all duration-300 hover:translate-x-2">{t.footer.courses.office}</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-all duration-300 hover:translate-x-2">{t.footer.courses.marketing}</a></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold text-card-foreground mb-4">{t.footer.support.title}</h4>
+              <h4 className="font-bold text-white mb-4 text-lg">{t.footer.support.title}</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">{t.footer.support.help}</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">{t.footer.support.contact}</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">{t.footer.support.faq}</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-all duration-300 hover:translate-x-2">{t.footer.support.help}</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-all duration-300 hover:translate-x-2">{t.footer.support.contact}</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-all duration-300 hover:translate-x-2">{t.footer.support.faq}</a></li>
               </ul>
               
               <div className="mt-6">
-                <h5 className="font-medium text-card-foreground mb-2">Bixin:</h5>
+                <h5 className="font-bold text-white mb-3 text-base">Bixin:</h5>
                 <div className="flex space-x-2">
                   <div className="w-8 h-5 bg-green-600 rounded flex items-center justify-center">
                     <span className="text-xs text-white font-bold">E</span>
@@ -389,13 +413,13 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="border-t border-border pt-8 mt-8 text-center">
-            <p className="text-muted-foreground" data-testid="footer-copyright">
+          <div className="border-t border-white/20 pt-8 mt-8 text-center">
+            <p className="text-gray-300 text-lg" data-testid="footer-copyright">
               {t.footer.copyright}
             </p>
             <div className="mt-4">
               <Link href="/admin/login">
-                <span className="text-xs text-muted-foreground hover:text-primary cursor-pointer">
+                <span className="text-sm text-gray-400 hover:text-white cursor-pointer transition-colors duration-300">
                   Admin
                 </span>
               </Link>
