@@ -111,6 +111,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
   // Get all courses
+  // Health check endpoint for deployment monitoring
+  app.get("/api/health", (req, res) => {
+    res.status(200).json({ 
+      status: "healthy", 
+      timestamp: new Date().toISOString(),
+      service: "CourseHub API" 
+    });
+  });
+
   app.get("/api/courses", async (req, res) => {
     try {
       const courses = await storage.getAllCourses();
