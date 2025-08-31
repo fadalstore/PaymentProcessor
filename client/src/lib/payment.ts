@@ -183,6 +183,23 @@ export function getMerchantPhone(paymentMethod: string): string {
   }
 }
 
+// Mask phone number in USSD code for display
+export function maskUSSDCode(ussdCode: string): string {
+  // Extract the phone number from the USSD code and mask it
+  // USSD format: *CODE*PHONE*AMOUNT#
+  const parts = ussdCode.split('*');
+  if (parts.length >= 3) {
+    const phone = parts[2];
+    if (phone.length > 6) {
+      // Keep first 3 and last 3 digits, mask middle with •
+      const maskedPhone = phone.substring(0, 3) + '•'.repeat(phone.length - 6) + phone.substring(phone.length - 3);
+      parts[2] = maskedPhone;
+      return parts.join('*');
+    }
+  }
+  return ussdCode;
+}
+
 // Process USSD payment - simplified version that just generates the code
 export async function processUSSDPayment(data: {
   courseId: string;

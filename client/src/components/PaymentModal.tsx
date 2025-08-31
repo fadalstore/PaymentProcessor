@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { type Course } from "@shared/schema";
 import { type Language, getTranslation } from "@/lib/i18n";
-import { processUSSDPayment, formatPhoneNumber, validatePhoneNumber, getCarrierFromPhone, openUSSDDialer, generateUSSDCode, getMerchantPhone } from "@/lib/payment";
+import { processUSSDPayment, formatPhoneNumber, validatePhoneNumber, getCarrierFromPhone, openUSSDDialer, generateUSSDCode, getMerchantPhone, maskUSSDCode } from "@/lib/payment";
 
 // Get country code prefix based on payment method
 function getCountryPrefix(paymentMethod: string): string {
@@ -435,7 +435,7 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                  'Dial this code on your phone:'}
               </p>
               <p className="text-lg sm:text-2xl font-mono font-bold text-primary bg-white dark:bg-slate-900 p-2 sm:p-3 rounded border">
-                {ussdCode}
+                {maskUSSDCode(ussdCode)}
               </p>
             </div>
 
@@ -488,9 +488,9 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                 data-testid="button-call-ussd"
               >
                 <Smartphone className="w-4 h-4 mr-2" />
-                {language === 'so' ? 'Wac Hadda' : 
-                 language === 'ar' ? 'اتصل الآن' : 
-                 'Call Now'}
+                {language === 'so' ? 'Iibso Hadda' : 
+                 language === 'ar' ? 'اشتري الآن' : 
+                 'Buy Now'}
               </Button>
             </div>
 
