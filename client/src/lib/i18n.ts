@@ -45,7 +45,18 @@ export const translations = {
       pay: "Bixi",
       processing: "Bixinta waa la qaabanayaa...",
       success: "Guul! Bixinta waa lagu guulaystay",
-      download: "Soo Deg Koorsada"
+      successMessage: "Waa ku mahad santihay iibsashada!",
+      download: "Soo Deg Koorsada",
+      cardPayment: "Card-ka Bixinta",
+      cardName: "Magaca Card-ka",
+      cardNamePlaceholder: "Gali magacaaga oo dhan",
+      email: "Email (Ikhtiyaar)",
+      emailPlaceholder: "your@email.com",
+      cardDetails: "Macluumaadka Card-ka",
+      total: "Wadarta",
+      payNow: "Bixi Hadda",
+      securePayment: "🔒 Bixin ammaan leh Stripe",
+      cardTypes: "Visa, Mastercard, American Express la aqbayaa"
     },
     testimonials: {
       title: "Waxay yiraahdo dadka loo baray"
@@ -117,7 +128,18 @@ export const translations = {
       pay: "Pay",
       processing: "Processing payment...",
       success: "Success! Payment completed",
-      download: "Download Course"
+      successMessage: "Thank you for your purchase!",
+      download: "Download Course",
+      cardPayment: "Card Payment",
+      cardName: "Cardholder Name",
+      cardNamePlaceholder: "Enter your full name",
+      email: "Email (Optional)",
+      emailPlaceholder: "your@email.com",
+      cardDetails: "Card Information",
+      total: "Total",
+      payNow: "Pay Now",
+      securePayment: "🔒 Secure payment powered by Stripe",
+      cardTypes: "Visa, Mastercard, American Express accepted"
     },
     testimonials: {
       title: "What our students say"
@@ -189,7 +211,18 @@ export const translations = {
       pay: "ادفع",
       processing: "جاري معالجة الدفع...",
       success: "نجح! تم الدفع بنجاح",
-      download: "تحميل الدورة"
+      successMessage: "شكرا لك على الشراء!",
+      download: "تحميل الدورة",
+      cardPayment: "دفع بالبطاقة",
+      cardName: "اسم حامل البطاقة",
+      cardNamePlaceholder: "أدخل اسمك الكامل",
+      email: "البريد الإلكتروني (اختياري)",
+      emailPlaceholder: "your@email.com",
+      cardDetails: "معلومات البطاقة",
+      total: "المجموع",
+      payNow: "ادفع الآن",
+      securePayment: "🔒 دفع آمن بواسطة Stripe",
+      cardTypes: "نقبل Visa و Mastercard و American Express"
     },
     testimonials: {
       title: "ماذا يقول طلابنا"

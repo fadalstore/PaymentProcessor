@@ -54,16 +54,25 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader2, CreditCard, Smartphone, Wallet, DollarSign, CheckCircle, Download } from "lucide-react";
+import { CardPaymentForm } from "@/components/CardPaymentForm";
+import { StripeProvider, isStripeEnabled } from "@/components/StripeProvider";
 
 const paymentSchema = z.object({
   phone: z.string()
-    .min(8, "Phone number is required"),
-  paymentMethod: z.enum(["evc", "zaad", "edahab"], {
+    .min(8, "Phone number is required").optional(),
+  paymentMethod: z.enum(["evc", "zaad", "edahab", "card"], {
     required_error: "Please select a payment method"
   })
 });
 
+const cardPaymentSchema = z.object({
+  name: z.string().min(2, "Name is required"),
+  email: z.string().email("Valid email is required").optional(),
+  paymentMethod: z.literal("card")
+});
+
 type PaymentFormData = z.infer<typeof paymentSchema>;
+type CardPaymentFormData = z.infer<typeof cardPaymentSchema>;
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -72,7 +81,7 @@ interface PaymentModalProps {
   language: Language;
 }
 
-type PaymentStep = 'details' | 'ussd-instructions' | 'success' | 'error';
+type PaymentStep = 'details' | 'ussd-instructions' | 'card-payment' | 'success' | 'error';
 
 export function PaymentModal({ isOpen, onClose, course, language }: PaymentModalProps) {
   const [step, setStep] = useState<PaymentStep>('details');
@@ -96,13 +105,13 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
   // Custom validation that considers payment method
   const validatePhoneWithContext = (phone: string) => {
     if (!phone || phone.length < 8) return false;
-    return validatePhoneNumber(phone, selectedPaymentMethod);
+    return validatePhoneNumber(phone, selectedPaymentMethod || 'evc');
   };
   
   // Auto-reformat phone number when payment method changes
   useEffect(() => {
     const currentPhone = form.getValues().phone;
-    if (selectedPaymentMethod && currentPhone && currentPhone.length >= 8) {
+    if (selectedPaymentMethod && selectedPaymentMethod !== 'card' && currentPhone && currentPhone.length >= 8) {
       const reformatted = formatPhoneNumber(currentPhone, selectedPaymentMethod);
       if (reformatted !== currentPhone) {
         form.setValue('phone', reformatted);
@@ -113,6 +122,22 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
 
   const onSubmit = async (data: PaymentFormData) => {
     if (!course) return;
+
+    // Handle card payment separately
+    if (data.paymentMethod === 'card') {
+      setStep('card-payment');
+      return;
+    }
+
+    // Handle mobile payments
+    if (!data.phone) {
+      toast({
+        title: "Khalad",
+        description: "Lambarka telefoonka waa loo baahan yahay",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       const formattedPhone = formatPhoneNumber(data.phone, data.paymentMethod);
@@ -142,16 +167,21 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
   const handleDownload = () => {
     if (!course) return;
     
-    const phone = formatPhoneNumber(form.getValues().phone, form.getValues().paymentMethod);
-    const downloadUrl = `/api/download/${course.id}/${phone}`;
+    const phone = form.getValues().phone;
+    const paymentMethod = form.getValues().paymentMethod;
     
-    // Create a temporary link to trigger download
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = `${course.title[language].replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-')}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (phone && paymentMethod !== 'card') {
+      const formattedPhone = formatPhoneNumber(phone, paymentMethod);
+      const downloadUrl = `/api/download/${course.id}/${formattedPhone}`;
+      
+      // Create a temporary link to trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${course.title[language].replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '-')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
     
     onClose();
     resetModal();
@@ -172,7 +202,8 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
   const paymentMethods = [
     { id: 'evc', name: 'EVC Plus', icon: Smartphone, color: 'text-green-600' },
     { id: 'zaad', name: 'ZAAD', icon: Wallet, color: 'text-blue-600' },
-    { id: 'edahab', name: 'eDahab', icon: DollarSign, color: 'text-orange-600' }
+    { id: 'edahab', name: 'eDahab', icon: DollarSign, color: 'text-orange-600' },
+    { id: 'card', name: 'Credit/Debit Card', icon: CreditCard, color: 'text-blue-500' }
   ];
 
   if (!course) return null;
@@ -228,9 +259,10 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="phone"
+                {selectedPaymentMethod !== 'card' && (
+                  <FormField
+                    control={form.control}
+                    name="phone"
                   rules={{
                     validate: (value) => {
                       if (!value || value.length < 8) {
@@ -302,7 +334,8 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                  />
+                )}
 
                 <FormField
                   control={form.control}
@@ -314,31 +347,43 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
                         {paymentMethods.map((method) => {
                           const Icon = method.icon;
                           const isSelected = field.value === method.id;
+                          const isCardMethod = method.id === 'card';
+                          const isDisabled = isCardMethod && !isStripeEnabled;
+                          
                           return (
                             <button
                               key={method.id}
                               type="button"
+                              disabled={isDisabled}
                               onClick={() => {
+                                if (isDisabled) return;
                                 field.onChange(method.id);
                                 // Auto-update phone number format when payment method changes
                                 const currentPhone = form.getValues().phone;
-                                if (currentPhone && currentPhone.length >= 8) {
+                                if (currentPhone && currentPhone.length >= 8 && !isCardMethod) {
                                   const reformatted = formatPhoneNumber(currentPhone, method.id);
                                   form.setValue('phone', reformatted);
                                   form.trigger('phone');
                                 }
                               }}
                               className={`flex flex-col items-center p-3 border rounded-lg transition-colors ${
-                                isSelected
+                                isDisabled
+                                  ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
+                                  : isSelected
                                   ? 'border-primary bg-primary/5'
                                   : 'border-border hover:border-primary hover:bg-primary/5'
                               }`}
                               data-testid={`payment-method-${method.id}`}
                             >
-                              <Icon className={`w-6 h-6 mb-2 ${method.color}`} />
-                              <span className="text-sm font-medium">
+                              <Icon className={`w-6 h-6 mb-2 ${isDisabled ? 'text-gray-400' : method.color}`} />
+                              <span className={`text-sm font-medium ${isDisabled ? 'text-gray-400' : ''}`}>
                                 {method.name}
                               </span>
+                              {isCardMethod && !isStripeEnabled && (
+                                <span className="text-xs text-gray-400 mt-1">
+                                  {language === 'so' ? 'La hagaajinayo' : 'Configuring'}
+                                </span>
+                              )}
                             </button>
                           );
                         })}
@@ -472,6 +517,23 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
               </p>
             </div>
           </div>
+        )}
+
+        {step === 'card-payment' && course && (
+          <StripeProvider>
+            <CardPaymentForm
+              course={course}
+              language={language}
+              onSuccess={(paymentId) => {
+                setPaymentId(paymentId);
+                setStep('success');
+              }}
+              onError={(error) => {
+                setErrorMessage(error);
+                setStep('error');
+              }}
+            />
+          </StripeProvider>
         )}
 
         {step === 'success' && (

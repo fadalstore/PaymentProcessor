@@ -6,6 +6,7 @@ import { z } from "zod";
 import path from "path";
 import session from "express-session";
 import bcrypt from "bcrypt";
+import Stripe from "stripe";
 
 // WaafiPay Integration - Supports both demo and production modes
 const processWaafiPayment = async (paymentData: {
@@ -74,6 +75,21 @@ const processWaafiPayment = async (paymentData: {
     };
   }
 };
+
+// Initialize Stripe (will work once API keys are provided)
+let stripe: Stripe | null = null;
+try {
+  if (process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-08-27.basil",
+    });
+    console.log("✅ Stripe initialized successfully");
+  } else {
+    console.log("⚠️ Stripe API key not found - card payments will be disabled");
+  }
+} catch (error) {
+  console.error("❌ Stripe initialization failed:", error);
+}
 
 // Admin authentication middleware
 const requireAdmin = (req: any, res: any, next: any) => {
@@ -170,6 +186,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(payment);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch payment" });
+    }
+  });
+
+  // Stripe payment intent creation
+  app.post("/api/payments/create-intent", async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(503).json({ 
+          message: "Card payments not available. Stripe API key not configured." 
+        });
+      }
+
+      const { courseId, amount, currency = "usd", customerName, customerEmail } = req.body;
+
+      // Validate course exists
+      const course = await storage.getCourse(courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      // Create payment record first
+      const paymentData = {
+        courseId,
+        phone: customerEmail || `card_${Date.now()}`, // Use email or generate identifier for card payments
+        amount: amount.toString(),
+        paymentMethod: "card",
+        status: "pending" as const
+      };
+
+      const payment = await storage.createPayment(paymentData);
+
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency,
+        metadata: {
+          courseId,
+          paymentId: payment.id,
+          customerName: customerName || "Anonymous",
+        },
+      });
+
+      res.json({
+        clientSecret: paymentIntent.client_secret,
+        paymentId: payment.id,
+      });
+    } catch (error: any) {
+      console.error("Stripe payment intent creation failed:", error);
+      res.status(500).json({ 
+        message: "Failed to create payment intent: " + error.message 
+      });
+    }
+  });
+
+  // Stripe webhook (for production)
+  app.post("/api/payments/stripe-webhook", async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(503).json({ message: "Stripe not configured" });
+      }
+
+      const sig = req.headers['stripe-signature'];
+      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+      if (!endpointSecret) {
+        console.log("⚠️ Stripe webhook secret not configured");
+        return res.status(400).json({ message: "Webhook secret not configured" });
+      }
+
+      if (!sig || typeof sig !== 'string') {
+        return res.status(400).json({ message: "Missing or invalid signature" });
+      }
+
+      let event;
+      try {
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+      } catch (err: any) {
+        console.error("Webhook signature verification failed:", err.message);
+        return res.status(400).json({ message: "Invalid signature" });
+      }
+
+      // Handle successful payment
+      if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+        const paymentId = paymentIntent.metadata.paymentId;
+        
+        if (paymentId) {
+          await storage.updatePaymentStatus(
+            paymentId,
+            "completed",
+            paymentIntent.id
+          );
+          console.log(`✅ Card payment completed: ${paymentId}`);
+        }
+      }
+
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error("Stripe webhook error:", error);
+      res.status(500).json({ message: "Webhook processing failed" });
     }
   });
 
