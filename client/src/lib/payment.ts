@@ -175,7 +175,7 @@ export function getMerchantPhone(paymentMethod: string): string {
     case 'evc':
       return '25261634844506'; // Somalia EVC merchant number
     case 'zaad':
-      return '25263634844506'; // Somaliland ZAAD merchant number  
+      return '252634844506'; // Somaliland ZAAD merchant number  
     case 'edahab':
       return '25261634844506'; // Somalia eDahab merchant number
     default:
