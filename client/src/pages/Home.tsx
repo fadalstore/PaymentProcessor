@@ -98,6 +98,11 @@ export default function Home() {
                   {t.navigation.courses}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all duration-300 group-hover:w-full"></span>
                 </a>
+                <Link href="/premium" className="text-amber-600 hover:text-amber-700 transition-all duration-300 font-medium hover:scale-105 relative group flex items-center space-x-1" data-testid="nav-premium">
+                  <Star className="w-4 h-4" />
+                  <span>Premium</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-300 group-hover:w-full"></span>
+                </Link>
                 <a href="#" className="text-foreground hover:text-primary transition-all duration-300 font-medium hover:scale-105 relative group" data-testid="nav-about">
                   {t.navigation.about}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-blue-600 transition-all duration-300 group-hover:w-full"></span>

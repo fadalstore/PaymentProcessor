@@ -1,4 +1,4 @@
-import { type Course, type InsertCourse, type Payment, type InsertPayment, type AdminUser, type InsertAdminUser } from "@shared/schema";
+import { type Course, type InsertCourse, type Payment, type InsertPayment, type AdminUser, type InsertAdminUser, type Subscription, type InsertSubscription, type UserProfile, type InsertUserProfile } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -21,17 +21,34 @@ export interface IStorage {
   createAdminUser(adminUser: InsertAdminUser): Promise<AdminUser>;
   getAdminByUsername(username: string): Promise<AdminUser | undefined>;
   getAllAdmins(): Promise<AdminUser[]>;
+  
+  // Subscription methods
+  createSubscription(subscription: InsertSubscription): Promise<Subscription>;
+  getSubscription(id: string): Promise<Subscription | undefined>;
+  getSubscriptionByStripeId(stripeSubscriptionId: string): Promise<Subscription | undefined>;
+  getUserSubscription(userId: string): Promise<Subscription | undefined>;
+  updateSubscriptionStatus(id: string, status: string, periodStart?: Date, periodEnd?: Date): Promise<Subscription | undefined>;
+  cancelSubscription(id: string, cancelAt?: Date): Promise<Subscription | undefined>;
+  
+  // User profile methods
+  createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
+  getUserProfile(userId: string): Promise<UserProfile | undefined>;
+  updateUserProfile(userId: string, profileUpdate: Partial<InsertUserProfile>): Promise<UserProfile | undefined>;
 }
 
 export class MemStorage implements IStorage {
   private courses: Map<string, Course>;
   private payments: Map<string, Payment>;
   private adminUsers: Map<string, AdminUser>;
+  private subscriptions: Map<string, Subscription>;
+  private userProfiles: Map<string, UserProfile>;
 
   constructor() {
     this.courses = new Map();
     this.payments = new Map();
     this.adminUsers = new Map();
+    this.subscriptions = new Map();
+    this.userProfiles = new Map();
     this.initializeCourses();
     this.initializeAdminUser();
   }
@@ -289,7 +306,7 @@ export class MemStorage implements IStorage {
       rating: insertCourse.rating || "4.5",
       image: insertCourse.image,
       fileUrl: insertCourse.fileUrl,
-      curriculum: Array.isArray(insertCourse.curriculum) ? insertCourse.curriculum : [],
+      curriculum: Array.isArray(insertCourse.curriculum) ? insertCourse.curriculum as string[] : [],
       createdAt: new Date(),
     };
     this.courses.set(id, course);
@@ -342,7 +359,7 @@ export class MemStorage implements IStorage {
       const updatedCourse: Course = { 
         ...course, 
         ...courseUpdate,
-        curriculum: courseUpdate.curriculum ? (Array.isArray(courseUpdate.curriculum) ? courseUpdate.curriculum : []) : course.curriculum
+        curriculum: courseUpdate.curriculum ? (Array.isArray(courseUpdate.curriculum) ? courseUpdate.curriculum as string[] : []) : course.curriculum
       };
       this.courses.set(id, updatedCourse);
       return updatedCourse;
@@ -397,6 +414,98 @@ export class MemStorage implements IStorage {
 
   async getAllAdmins(): Promise<AdminUser[]> {
     return Array.from(this.adminUsers.values());
+  }
+
+  // Subscription methods
+  async createSubscription(insertSubscription: InsertSubscription): Promise<Subscription> {
+    const id = randomUUID();
+    const subscription: Subscription = {
+      id,
+      userId: insertSubscription.userId,
+      stripeCustomerId: insertSubscription.stripeCustomerId || null,
+      stripeSubscriptionId: insertSubscription.stripeSubscriptionId || null,
+      plan: insertSubscription.plan,
+      status: insertSubscription.status || "active",
+      currentPeriodStart: insertSubscription.currentPeriodStart || null,
+      currentPeriodEnd: insertSubscription.currentPeriodEnd || null,
+      cancelAtPeriodEnd: insertSubscription.cancelAtPeriodEnd || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.subscriptions.set(id, subscription);
+    return subscription;
+  }
+
+  async getSubscription(id: string): Promise<Subscription | undefined> {
+    return this.subscriptions.get(id);
+  }
+
+  async getSubscriptionByStripeId(stripeSubscriptionId: string): Promise<Subscription | undefined> {
+    return Array.from(this.subscriptions.values()).find(s => s.stripeSubscriptionId === stripeSubscriptionId);
+  }
+
+  async getUserSubscription(userId: string): Promise<Subscription | undefined> {
+    return Array.from(this.subscriptions.values()).find(s => s.userId === userId && s.status === "active");
+  }
+
+  async updateSubscriptionStatus(id: string, status: string, periodStart?: Date, periodEnd?: Date): Promise<Subscription | undefined> {
+    const subscription = this.subscriptions.get(id);
+    if (subscription) {
+      subscription.status = status;
+      subscription.updatedAt = new Date();
+      if (periodStart) subscription.currentPeriodStart = periodStart;
+      if (periodEnd) subscription.currentPeriodEnd = periodEnd;
+      this.subscriptions.set(id, subscription);
+      return subscription;
+    }
+    return undefined;
+  }
+
+  async cancelSubscription(id: string, cancelAt?: Date): Promise<Subscription | undefined> {
+    const subscription = this.subscriptions.get(id);
+    if (subscription) {
+      subscription.status = "cancelled";
+      subscription.cancelAtPeriodEnd = cancelAt || new Date();
+      subscription.updatedAt = new Date();
+      this.subscriptions.set(id, subscription);
+      return subscription;
+    }
+    return undefined;
+  }
+
+  // User profile methods
+  async createUserProfile(insertProfile: InsertUserProfile): Promise<UserProfile> {
+    const id = randomUUID();
+    const profile: UserProfile = {
+      id,
+      userId: insertProfile.userId,
+      name: insertProfile.name || null,
+      email: insertProfile.email || null,
+      phone: insertProfile.phone || null,
+      subscriptionId: insertProfile.subscriptionId || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.userProfiles.set(insertProfile.userId, profile);
+    return profile;
+  }
+
+  async getUserProfile(userId: string): Promise<UserProfile | undefined> {
+    return this.userProfiles.get(userId);
+  }
+
+  async updateUserProfile(userId: string, profileUpdate: Partial<InsertUserProfile>): Promise<UserProfile | undefined> {
+    const profile = this.userProfiles.get(userId);
+    if (profile) {
+      const updatedProfile: UserProfile = {
+        ...profile,
+        ...profileUpdate,
+        updatedAt: new Date(),
+      };
+      this.userProfiles.set(userId, updatedProfile);
+      return updatedProfile;
+    }
+    return undefined;
   }
 }
 

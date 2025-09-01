@@ -1,22 +1,46 @@
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
-import { ReactNode } from "react";
-
-// Initialize Stripe (will work once VITE_STRIPE_PUBLIC_KEY is provided)
-let stripePromise: Promise<any> | null = null;
-
-if (import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
-  console.log("✅ Stripe public key found - Card payments enabled");
-} else {
-  console.log("⚠️ Stripe public key not found - Card payments disabled");
-}
+import { ReactNode, useEffect, useState } from "react";
 
 interface StripeProviderProps {
   children: ReactNode;
 }
 
+let stripePromise: Promise<any> | null = null;
+
 export function StripeProvider({ children }: StripeProviderProps) {
+  const [isStripeLoaded, setIsStripeLoaded] = useState(false);
+
+  useEffect(() => {
+    const initializeStripe = async () => {
+      try {
+        const response = await fetch('/api/config');
+        const config = await response.json();
+        
+        if (config.stripe.publishableKey) {
+          stripePromise = loadStripe(config.stripe.publishableKey);
+          console.log("✅ Stripe public key found - Card payments enabled");
+        } else {
+          console.log("⚠️ Stripe public key not found - Card payments disabled");
+        }
+      } catch (error) {
+        console.error("Failed to load Stripe configuration:", error);
+      } finally {
+        setIsStripeLoaded(true);
+      }
+    };
+
+    if (!stripePromise) {
+      initializeStripe();
+    } else {
+      setIsStripeLoaded(true);
+    }
+  }, []);
+
+  if (!isStripeLoaded) {
+    return <>{children}</>;
+  }
+
   if (!stripePromise) {
     // Return children without Stripe wrapper if no public key
     return <>{children}</>;
@@ -25,4 +49,22 @@ export function StripeProvider({ children }: StripeProviderProps) {
   return <Elements stripe={stripePromise}>{children}</Elements>;
 }
 
-export const isStripeEnabled = !!import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+export const checkStripeEnabled = async (): Promise<boolean> => {
+  try {
+    const response = await fetch('/api/config');
+    const config = await response.json();
+    return config.stripe.enabled;
+  } catch {
+    return false;
+  }
+};
+
+// For backward compatibility
+export let isStripeEnabled = false;
+
+// Update the flag when Stripe is loaded
+if (typeof window !== 'undefined') {
+  checkStripeEnabled().then(enabled => {
+    isStripeEnabled = enabled;
+  });
+}

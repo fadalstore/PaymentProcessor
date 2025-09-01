@@ -1,9 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPaymentSchema, insertCourseSchema, insertAdminUserSchema } from "@shared/schema";
+import { insertPaymentSchema, insertCourseSchema, insertAdminUserSchema, insertSubscriptionSchema, insertUserProfileSchema } from "@shared/schema";
 import { z } from "zod";
 import path from "path";
+import { randomUUID } from "crypto";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import bcrypt from "bcrypt";
@@ -133,6 +134,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       status: "healthy", 
       timestamp: new Date().toISOString(),
       service: "CourseHub API" 
+    });
+  });
+
+  // Get public configuration
+  app.get("/api/config", (req, res) => {
+    res.json({
+      stripe: {
+        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
+        enabled: !!process.env.STRIPE_PUBLISHABLE_KEY
+      }
     });
   });
 
@@ -311,6 +322,297 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Stripe webhook error:", error);
       res.status(500).json({ message: "Webhook processing failed" });
+    }
+  });
+
+  // Premium subscription endpoints
+  
+  // Create Stripe Checkout session for premium subscription
+  app.post("/api/subscriptions/create-checkout", async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(503).json({ 
+          message: "Premium subscriptions not available. Stripe not configured." 
+        });
+      }
+
+      const { userId, plan, customerEmail, returnUrl } = req.body;
+
+      if (!userId || !plan || !customerEmail) {
+        return res.status(400).json({ 
+          message: "Missing required fields: userId, plan, customerEmail" 
+        });
+      }
+
+      // Define subscription plans
+      const plans = {
+        premium: {
+          priceId: process.env.STRIPE_PREMIUM_PRICE_ID || 'price_premium_placeholder',
+          amount: 2999, // $29.99 per month
+          name: 'Premium Plan'
+        }
+      };
+
+      if (!plans[plan as keyof typeof plans]) {
+        return res.status(400).json({ message: "Invalid plan selected" });
+      }
+
+      const selectedPlan = plans[plan as keyof typeof plans];
+
+      // Create or retrieve customer
+      let customer;
+      try {
+        const existingCustomers = await stripe.customers.list({
+          email: customerEmail,
+          limit: 1
+        });
+
+        if (existingCustomers.data.length > 0) {
+          customer = existingCustomers.data[0];
+        } else {
+          customer = await stripe.customers.create({
+            email: customerEmail,
+            metadata: { userId }
+          });
+        }
+      } catch (error: any) {
+        console.error("Customer creation/retrieval failed:", error);
+        return res.status(500).json({ message: "Customer setup failed" });
+      }
+
+      // Create checkout session
+      const session = await stripe.checkout.sessions.create({
+        customer: customer.id,
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: `${selectedPlan.name} - Premium Features`,
+                description: 'Full access to AI assistant and advanced scheduling tools'
+              },
+              unit_amount: selectedPlan.amount,
+              recurring: {
+                interval: 'month'
+              }
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'subscription',
+        success_url: `${returnUrl || req.headers.origin}/premium/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${returnUrl || req.headers.origin}/premium/cancelled`,
+        metadata: {
+          userId,
+          plan,
+          customerEmail
+        }
+      });
+
+      res.json({
+        sessionId: session.id,
+        url: session.url
+      });
+    } catch (error: any) {
+      console.error("Stripe checkout session creation failed:", error);
+      res.status(500).json({ 
+        message: "Failed to create checkout session: " + error.message 
+      });
+    }
+  });
+
+  // Get user subscription status
+  app.get("/api/subscriptions/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const subscription = await storage.getUserSubscription(userId);
+      const userProfile = await storage.getUserProfile(userId);
+
+      res.json({
+        subscription: subscription || null,
+        profile: userProfile || null,
+        isPremium: !!(subscription && subscription.status === "active" && subscription.plan === "premium")
+      });
+    } catch (error) {
+      console.error("Failed to fetch subscription:", error);
+      res.status(500).json({ message: "Failed to fetch subscription" });
+    }
+  });
+
+  // Premium access middleware
+  const requirePremium = async (req: any, res: any, next: any) => {
+    try {
+      const userId = req.params.userId || req.body.userId || req.query.userId;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID required" });
+      }
+
+      const subscription = await storage.getUserSubscription(userId);
+      if (!subscription || subscription.status !== "active" || subscription.plan !== "premium") {
+        return res.status(403).json({ 
+          message: "Premium subscription required",
+          upgrade: true
+        });
+      }
+
+      req.userSubscription = subscription;
+      next();
+    } catch (error) {
+      res.status(500).json({ message: "Subscription check failed" });
+    }
+  };
+
+  // Premium AI Assistant endpoint (protected)
+  app.post("/api/premium/ai-assistant", requirePremium, async (req, res) => {
+    try {
+      const { prompt, context, userId } = req.body;
+      
+      // This would integrate with your AI service (OpenAI, Claude, etc.)
+      // For now, returning a mock response
+      const aiResponse = {
+        response: `Premium AI Response to: "${prompt}". This is a premium feature with advanced context understanding and personalized recommendations.`,
+        usage: {
+          tokens: Math.floor(Math.random() * 1000) + 100
+        },
+        premium: true
+      };
+
+      res.json(aiResponse);
+    } catch (error) {
+      console.error("AI Assistant error:", error);
+      res.status(500).json({ message: "AI Assistant service failed" });
+    }
+  });
+
+  // Premium scheduling endpoint (protected)
+  app.post("/api/premium/schedule", requirePremium, async (req, res) => {
+    try {
+      const { userId, scheduleData } = req.body;
+      
+      // Advanced scheduling logic would go here
+      const schedule = {
+        id: randomUUID(),
+        userId,
+        ...scheduleData,
+        premium: true,
+        advancedFeatures: {
+          aiOptimization: true,
+          conflictResolution: true,
+          smartReminders: true
+        },
+        createdAt: new Date()
+      };
+
+      res.json({
+        success: true,
+        schedule,
+        message: "Premium schedule created with advanced features"
+      });
+    } catch (error) {
+      console.error("Premium scheduling error:", error);
+      res.status(500).json({ message: "Premium scheduling service failed" });
+    }
+  });
+
+  // Stripe webhook for subscription events
+  app.post("/api/subscriptions/stripe-webhook", async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(503).json({ message: "Stripe not configured" });
+      }
+
+      const sig = req.headers['stripe-signature'];
+      const endpointSecret = process.env.STRIPE_SUBSCRIPTION_WEBHOOK_SECRET;
+
+      if (!endpointSecret) {
+        console.log("⚠️ Stripe subscription webhook secret not configured");
+        return res.status(400).json({ message: "Webhook secret not configured" });
+      }
+
+      if (!sig || typeof sig !== 'string') {
+        return res.status(400).json({ message: "Missing or invalid signature" });
+      }
+
+      let event;
+      try {
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+      } catch (err: any) {
+        console.error("Subscription webhook signature verification failed:", err.message);
+        return res.status(400).json({ message: "Invalid signature" });
+      }
+
+      // Handle subscription events
+      switch (event.type) {
+        case 'checkout.session.completed':
+          const session = event.data.object;
+          if (session.mode === 'subscription') {
+            const { userId, plan, customerEmail } = session.metadata;
+            
+            // Create user profile if it doesn't exist
+            let userProfile = await storage.getUserProfile(userId);
+            if (!userProfile) {
+              userProfile = await storage.createUserProfile({
+                userId,
+                email: customerEmail,
+                name: null,
+                phone: null,
+                subscriptionId: null
+              });
+            }
+
+            // Get the subscription from Stripe
+            const stripeSubscription = await stripe.subscriptions.retrieve(session.subscription as string);
+            
+            // Create subscription record
+            const subscription = await storage.createSubscription({
+              userId,
+              stripeCustomerId: session.customer as string,
+              stripeSubscriptionId: stripeSubscription.id,
+              plan,
+              status: "active",
+              currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+              currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+              cancelAtPeriodEnd: null
+            });
+
+            // Link subscription to user profile
+            await storage.updateUserProfile(userId, { subscriptionId: subscription.id });
+            
+            console.log(`✅ Premium subscription activated for user: ${userId}`);
+          }
+          break;
+
+        case 'customer.subscription.updated':
+          const updatedSubscription = event.data.object;
+          const existingSub = await storage.getSubscriptionByStripeId(updatedSubscription.id);
+          
+          if (existingSub) {
+            await storage.updateSubscriptionStatus(
+              existingSub.id,
+              updatedSubscription.status,
+              new Date(updatedSubscription.current_period_start * 1000),
+              new Date(updatedSubscription.current_period_end * 1000)
+            );
+            console.log(`🔄 Subscription updated: ${updatedSubscription.id}`);
+          }
+          break;
+
+        case 'customer.subscription.deleted':
+          const cancelledSubscription = event.data.object;
+          const cancelledSub = await storage.getSubscriptionByStripeId(cancelledSubscription.id);
+          
+          if (cancelledSub) {
+            await storage.cancelSubscription(cancelledSub.id);
+            console.log(`❌ Subscription cancelled: ${cancelledSubscription.id}`);
+          }
+          break;
+      }
+
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error("Subscription webhook error:", error);
+      res.status(500).json({ message: "Subscription webhook processing failed" });
     }
   });
 
