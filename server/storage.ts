@@ -473,6 +473,20 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
+  async updateSubscription(id: string, updateData: Partial<Subscription>): Promise<Subscription | undefined> {
+    const subscription = this.subscriptions.get(id);
+    if (subscription) {
+      const updated: Subscription = {
+        ...subscription,
+        ...updateData,
+        updatedAt: new Date()
+      };
+      this.subscriptions.set(id, updated);
+      return updated;
+    }
+    return undefined;
+  }
+
   // User profile methods
   async createUserProfile(insertProfile: InsertUserProfile): Promise<UserProfile> {
     const id = randomUUID();

@@ -422,6 +422,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create mobile money subscription
+  app.post("/api/subscriptions/create-mobile-money", async (req, res) => {
+    try {
+      const { userId, paymentMethod, phone, plan = 'premium', customerEmail } = req.body;
+
+      if (!userId || !paymentMethod || !phone) {
+        return res.status(400).json({ 
+          message: "Missing required fields: userId, paymentMethod, phone" 
+        });
+      }
+
+      // Validate payment method
+      const supportedMethods = ['evc', 'zaad', 'edahab'];
+      if (!supportedMethods.includes(paymentMethod)) {
+        return res.status(400).json({ 
+          message: "Unsupported payment method. Supported: " + supportedMethods.join(', ')
+        });
+      }
+
+      // Generate subscription ID
+      const subscriptionId = `sub_mm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Mobile money provider mapping
+      const providers = {
+        evc: 'EVC Plus',
+        zaad: 'ZAAD', 
+        edahab: 'eDahab'
+      };
+
+      // Generate payment instructions/USSD codes
+      const paymentInstructions = {
+        evc: `*788*${phone}*29.99#`,
+        zaad: `*252*1*29.99*${phone}#`,
+        edahab: `*384*29.99*${phone}#`
+      };
+
+      // Create subscription record in database
+      const subscription = await storage.createSubscription({
+        id: subscriptionId,
+        userId,
+        plan,
+        status: 'pending',
+        stripeSubscriptionId: null, // Mobile money doesn't use Stripe
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      // Create user profile if doesn't exist
+      try {
+        const existingProfile = await storage.getUserProfile(userId);
+        if (!existingProfile) {
+          await storage.createUserProfile({
+            id: `profile_${userId}`,
+            userId,
+            email: customerEmail || `${phone}@mobile.local`,
+            preferences: JSON.stringify({ paymentMethod, phone }),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
+      } catch (error) {
+        console.log("Profile creation skipped:", error);
+      }
+
+      res.json({
+        subscriptionId,
+        status: 'pending',
+        provider: providers[paymentMethod as keyof typeof providers],
+        paymentMethod,
+        amount: 29.99,
+        currency: 'USD',
+        ussdCode: paymentInstructions[paymentMethod as keyof typeof paymentInstructions],
+        instructions: {
+          so: `Dial ${paymentInstructions[paymentMethod as keyof typeof paymentInstructions]} to complete your premium subscription payment`,
+          en: `Dial ${paymentInstructions[paymentMethod as keyof typeof paymentInstructions]} to complete your premium subscription payment`,
+          ar: `اطلب ${paymentInstructions[paymentMethod as keyof typeof paymentInstructions]} لإتمام دفع اشتراكك المميز`
+        },
+        message: `Please dial ${paymentInstructions[paymentMethod as keyof typeof paymentInstructions]} to complete your premium subscription payment of $29.99`
+      });
+    } catch (error: any) {
+      console.error("Mobile money subscription creation failed:", error);
+      res.status(500).json({ 
+        message: "Failed to create mobile money subscription: " + error.message 
+      });
+    }
+  });
+
+  // Simulate mobile money payment completion (for testing)
+  app.post("/api/subscriptions/complete-mobile-money", async (req, res) => {
+    try {
+      const { subscriptionId, transactionId } = req.body;
+
+      if (!subscriptionId) {
+        return res.status(400).json({ message: "Subscription ID required" });
+      }
+
+      // Update subscription status to active
+      const subscription = await storage.updateSubscription(subscriptionId, {
+        status: 'active',
+        updatedAt: new Date()
+      });
+
+      res.json({
+        success: true,
+        subscription,
+        message: "Premium subscription activated successfully!"
+      });
+    } catch (error: any) {
+      console.error("Mobile money completion failed:", error);
+      res.status(500).json({ 
+        message: "Failed to complete mobile money subscription: " + error.message 
+      });
+    }
+  });
+
   // Get user subscription status
   app.get("/api/subscriptions/:userId", async (req, res) => {
     try {
