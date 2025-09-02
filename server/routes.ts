@@ -139,10 +139,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get public configuration
   app.get("/api/config", (req, res) => {
+    const stripePublicKey = process.env.VITE_STRIPE_PUBLIC_KEY;
     res.json({
       stripe: {
-        publishableKey: process.env.VITE_STRIPE_PUBLIC_KEY || null,
-        enabled: !!process.env.VITE_STRIPE_PUBLIC_KEY
+        publishableKey: stripePublicKey || null,
+        enabled: !!(stripePublicKey && stripePublicKey.startsWith('pk_'))
       }
     });
   });

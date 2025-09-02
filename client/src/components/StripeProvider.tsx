@@ -53,18 +53,19 @@ export const checkStripeEnabled = async (): Promise<boolean> => {
   try {
     const response = await fetch('/api/config');
     const config = await response.json();
-    return config.stripe.enabled;
+    return config.stripe.enabled && !!config.stripe.publishableKey;
   } catch {
     return false;
   }
 };
 
-// For backward compatibility
+// For backward compatibility - check if Stripe is properly configured
 export let isStripeEnabled = false;
 
 // Update the flag when Stripe is loaded
 if (typeof window !== 'undefined') {
   checkStripeEnabled().then(enabled => {
     isStripeEnabled = enabled;
+    console.log('🔄 Stripe enabled status:', enabled);
   });
 }
