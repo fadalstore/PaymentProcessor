@@ -141,8 +141,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/config", (req, res) => {
     res.json({
       stripe: {
-        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
-        enabled: !!process.env.STRIPE_PUBLISHABLE_KEY
+        publishableKey: process.env.VITE_STRIPE_PUBLIC_KEY || null,
+        enabled: !!process.env.VITE_STRIPE_PUBLIC_KEY
       }
     });
   });
@@ -460,13 +460,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create subscription record in database
       const subscription = await storage.createSubscription({
-        id: subscriptionId,
         userId,
         plan,
         status: 'pending',
         stripeSubscriptionId: null, // Mobile money doesn't use Stripe
-        createdAt: new Date(),
-        updatedAt: new Date()
       });
 
       // Create user profile if doesn't exist
@@ -474,12 +471,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const existingProfile = await storage.getUserProfile(userId);
         if (!existingProfile) {
           await storage.createUserProfile({
-            id: `profile_${userId}`,
             userId,
             email: customerEmail || `${phone}@mobile.local`,
-            preferences: JSON.stringify({ paymentMethod, phone }),
-            createdAt: new Date(),
-            updatedAt: new Date()
+            phone: phone,
           });
         }
       } catch (error) {
@@ -520,8 +514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update subscription status to active
       const subscription = await storage.updateSubscription(subscriptionId, {
-        status: 'active',
-        updatedAt: new Date()
+        status: 'active'
       });
 
       res.json({
@@ -662,17 +655,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'checkout.session.completed':
           const session = event.data.object;
           if (session.mode === 'subscription') {
-            const { userId, plan, customerEmail } = session.metadata;
+            const userId = session.metadata?.userId;
+            const plan = session.metadata?.plan;
+            const customerEmail = session.metadata?.customerEmail;
             
             // Create user profile if it doesn't exist
             let userProfile = await storage.getUserProfile(userId);
-            if (!userProfile) {
+            if (!userProfile && userId) {
               userProfile = await storage.createUserProfile({
                 userId,
-                email: customerEmail,
+                email: customerEmail || null,
                 name: null,
                 phone: null,
-                subscriptionId: null
               });
             }
 
@@ -692,7 +686,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
 
             // Link subscription to user profile
-            await storage.updateUserProfile(userId, { subscriptionId: subscription.id });
+            if (userId) {
+              await storage.updateUserProfile(userId, { subscriptionId: subscription.id });
+            }
             
             console.log(`✅ Premium subscription activated for user: ${userId}`);
           }

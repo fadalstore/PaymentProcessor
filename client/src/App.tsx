@@ -8,6 +8,8 @@ import CourseDetail from "@/pages/CourseDetail";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import { Premium } from "@/pages/Premium";
+import { PremiumSuccess } from "@/pages/PremiumSuccess";
+import { PremiumCancelled } from "@/pages/PremiumCancelled";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +18,8 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/course/:id" component={CourseDetail} />
       <Route path="/premium" component={Premium} />
+      <Route path="/premium/success" component={PremiumSuccess} />
+      <Route path="/premium/cancelled" component={PremiumCancelled} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/en" component={Home} />
