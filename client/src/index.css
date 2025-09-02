@@ -4,6 +4,80 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Google AdSense Styling */
+.adsense-container {
+  @apply flex justify-center items-center;
+  margin: 1rem 0;
+}
+
+.sidebar-ad {
+  @apply sticky top-4 self-start;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.banner-ad {
+  @apply w-full;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 20px 0;
+}
+
+.square-ad {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 15px auto;
+}
+
+.responsive-ad {
+  @apply w-full;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 20px 0;
+}
+
+/* Ad label styling */
+.adsense-container::before {
+  content: "إعلان / Advertisement / Xayeysiis";
+  position: absolute;
+  top: -15px;
+  left: 10px;
+  background: #fff;
+  color: #6c757d;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid #e9ecef;
+}
+
+/* Loading placeholder */
+.adsbygoogle:empty {
+  background: linear-gradient(90deg, #f0f0f0 25%, transparent 25%), 
+              linear-gradient(#f0f0f0 50%, transparent 50%);
+  background-size: 20px 20px;
+  position: relative;
+}
+
+.adsbygoogle:empty::after {
+  content: "Google AdSense";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 :root {
   --radius: 0.5rem;
   --background: hsl(0 0% 100%);

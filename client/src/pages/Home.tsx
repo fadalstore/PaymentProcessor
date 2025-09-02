@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { GraduationCap, Users, Star, Smartphone, Download, Award, Rocket, Menu } from "lucide-react";
 import { Link } from "wouter";
+import { BannerAd, SquareAd, ResponsiveAd } from "@/components/GoogleAdsense";
+import { AdSidebar } from "@/components/AdSidebar";
 
 export default function Home() {
   const { language } = useLanguage();
@@ -75,6 +77,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Ad Sidebar */}
+      <AdSidebar />
       {/* Header */}
       <header className="sticky top-0 z-50 glass-effect border-b border-white/20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -194,6 +198,13 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Banner Ad */}
+      <div className="py-4 bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <BannerAd />
+        </div>
+      </div>
+
       {/* Features Section */}
       <section className="py-20 bg-gradient-to-b from-secondary to-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -255,6 +266,11 @@ export default function Home() {
             </p>
           </div>
           
+          {/* Square Ad */}
+          <div className="flex justify-center mb-8">
+            <SquareAd />
+          </div>
+          
           {isLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(6)].map((_, i) => (
@@ -286,6 +302,13 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      {/* Responsive Ad */}
+      <div className="py-4 bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <ResponsiveAd />
+        </div>
+      </div>
 
       {/* Testimonials Section */}
       <section className="py-20 bg-gradient-to-b from-background to-secondary">
