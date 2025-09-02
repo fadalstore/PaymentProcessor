@@ -14,6 +14,28 @@ export function GoogleAdsense({
   style = {}, 
   className = '' 
 }: GoogleAdsenseProps) {
+  // Disable AdSense in development to prevent errors
+  if (process.env.NODE_ENV === 'development') {
+    return (
+      <div className={`adsense-container ${className}`} style={style}>
+        <div 
+          style={{ 
+            display: 'block',
+            backgroundColor: '#f0f0f0',
+            border: '1px dashed #ccc',
+            textAlign: 'center',
+            padding: '20px',
+            color: '#666',
+            fontSize: '14px',
+            ...style 
+          }}
+        >
+          [Ad Space - Disabled in Development]
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     try {
       // @ts-ignore
