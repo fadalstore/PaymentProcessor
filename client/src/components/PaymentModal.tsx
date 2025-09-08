@@ -125,6 +125,7 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
 
     // Handle card payment separately
     if (data.paymentMethod === 'card') {
+      console.log('🔄 Switching to card payment step');
       setStep('card-payment');
       return;
     }
@@ -520,20 +521,25 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
         )}
 
         {step === 'card-payment' && course && (
-          <StripeProvider>
-            <CardPaymentForm
-              course={course}
-              language={language}
-              onSuccess={(paymentId) => {
-                setPaymentId(paymentId);
-                setStep('success');
-              }}
-              onError={(error) => {
-                setErrorMessage(error);
-                setStep('error');
-              }}
-            />
-          </StripeProvider>
+          <div>
+            <div className="mb-4 p-2 bg-blue-100 text-blue-800 rounded">
+              Debug: Card payment step active
+            </div>
+            <StripeProvider>
+              <CardPaymentForm
+                course={course}
+                language={language}
+                onSuccess={(paymentId) => {
+                  setPaymentId(paymentId);
+                  setStep('success');
+                }}
+                onError={(error) => {
+                  setErrorMessage(error);
+                  setStep('error');
+                }}
+              />
+            </StripeProvider>
+          </div>
         )}
 
         {step === 'success' && (
