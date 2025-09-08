@@ -19,7 +19,7 @@ export function StripeProvider({ children }: StripeProviderProps) {
         
         if (config.stripe.publishableKey) {
           stripePromise = loadStripe(config.stripe.publishableKey);
-          console.log("✅ Stripe public key found - Card payments enabled");
+          console.log("✅ Stripe public key found - Card payments enabled", config.stripe.publishableKey.substring(0, 15) + "...");
         } else {
           console.log("⚠️ Stripe public key not found - Card payments disabled");
         }
@@ -38,12 +38,12 @@ export function StripeProvider({ children }: StripeProviderProps) {
   }, []);
 
   if (!isStripeLoaded) {
-    return <>{children}</>;
+    return <div>Loading payment system...</div>;
   }
 
   if (!stripePromise) {
-    // Return children without Stripe wrapper if no public key
-    return <>{children}</>;
+    // Return error message if no Stripe configuration
+    return <div>Payment system not available</div>;
   }
 
   return <Elements stripe={stripePromise}>{children}</Elements>;
