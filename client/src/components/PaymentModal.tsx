@@ -58,11 +58,20 @@ import { CardPaymentForm } from "@/components/CardPaymentForm";
 import { StripeProvider, isStripeEnabled } from "@/components/StripeProvider";
 
 const paymentSchema = z.object({
-  phone: z.string()
-    .min(8, "Phone number is required").optional(),
+  phone: z.string().optional(),
   paymentMethod: z.enum(["evc", "zaad", "edahab", "card"], {
     required_error: "Please select a payment method"
   })
+}).refine((data) => {
+  // For card payments, phone is not required
+  if (data.paymentMethod === 'card') {
+    return true;
+  }
+  // For mobile payments, phone is required
+  return data.phone && data.phone.length >= 8;
+}, {
+  message: "Lambarka telefoonka waa loo baahan yahay",
+  path: ["phone"]
 });
 
 const cardPaymentSchema = z.object({
@@ -121,6 +130,7 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
   }, [selectedPaymentMethod, form]);
 
   const onSubmit = async (data: PaymentFormData) => {
+    console.log('📝 Form submitted with data:', data);
     if (!course) return;
 
     // Handle card payment separately
