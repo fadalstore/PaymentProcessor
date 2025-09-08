@@ -130,12 +130,10 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
   }, [selectedPaymentMethod, form]);
 
   const onSubmit = async (data: PaymentFormData) => {
-    console.log('📝 Form submitted with data:', data);
     if (!course) return;
 
     // Handle card payment separately
     if (data.paymentMethod === 'card') {
-      console.log('🔄 Switching to card payment step');
       setStep('card-payment');
       return;
     }
@@ -532,9 +530,6 @@ export function PaymentModal({ isOpen, onClose, course, language }: PaymentModal
 
         {step === 'card-payment' && course && (
           <div>
-            <div className="mb-4 p-2 bg-blue-100 text-blue-800 rounded">
-              Debug: Card payment step active
-            </div>
             <StripeProvider>
               <CardPaymentForm
                 course={course}
