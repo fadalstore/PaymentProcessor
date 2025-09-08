@@ -660,9 +660,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const plan = session.metadata?.plan;
             const customerEmail = session.metadata?.customerEmail;
             
+            // Validate required fields
+            if (!userId || !plan) {
+              console.error('Missing required subscription data:', { userId, plan });
+              break;
+            }
+
             // Create user profile if it doesn't exist
             let userProfile = await storage.getUserProfile(userId);
-            if (!userProfile && userId) {
+            if (!userProfile) {
               userProfile = await storage.createUserProfile({
                 userId,
                 email: customerEmail || null,
@@ -681,8 +687,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               stripeSubscriptionId: stripeSubscription.id,
               plan,
               status: "active",
-              currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
-              currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+              currentPeriodStart: new Date((stripeSubscription as any).current_period_start * 1000),
+              currentPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000),
               cancelAtPeriodEnd: null
             });
 
@@ -703,8 +709,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await storage.updateSubscriptionStatus(
               existingSub.id,
               updatedSubscription.status,
-              new Date(updatedSubscription.current_period_start * 1000),
-              new Date(updatedSubscription.current_period_end * 1000)
+              new Date((updatedSubscription as any).current_period_start * 1000),
+              new Date((updatedSubscription as any).current_period_end * 1000)
             );
             console.log(`🔄 Subscription updated: ${updatedSubscription.id}`);
           }
